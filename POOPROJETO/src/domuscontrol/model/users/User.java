@@ -27,13 +27,17 @@ public class User implements Serializable {
     // Lista de casas em que o utilizador é apenas usufrutuário
     private final List<House> guestHouses;
 
-    public User(String id, String name, String email, String password) {
+    // Indica se o utilizador é administrador do sistema
+    private boolean admin;
+
+    public User(String id, String name, String email, String password, Boolean admin) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.ownedHouses = new ArrayList<>();
         this.guestHouses = new ArrayList<>();
+        this.admin =false;
     }
 
     // Adiciona uma casa à lista de casas administradas pelo utilizador
@@ -85,7 +89,14 @@ public class User implements Serializable {
     // Verifica se a password está correta
     public boolean checkPassword(String password) {
         return this.password.equals(password);
+    
     }
+
+    // Verifica se o utilizador é administrador
+public boolean isAdmin() { return admin; }
+
+// Define se o utilizador é administrador
+public void setAdmin(boolean admin) { this.admin = admin; }
 
     @Override
     public String toString() {

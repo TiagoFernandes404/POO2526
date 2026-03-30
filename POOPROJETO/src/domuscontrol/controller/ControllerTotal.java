@@ -14,7 +14,7 @@ import domuscontrol.view.*;
 // Orquestra as views e o DomusController - gere o fluxo da aplicação
 public class ControllerTotal {
 
-    private DomusController controller;
+    private final DomusController controller;
     private final MainUI mainUI;
     private final UserUI userUI;
     private final HouseUI houseUI;
@@ -27,13 +27,10 @@ public class ControllerTotal {
     private User loggedUser;
 
     public ControllerTotal() {
-        // Tenta carregar estado guardado; se não existir, cria novo e carrega dados de teste
-       DomusController loaded = StateManager.load();
-if (loaded != null) {
-    this.controller = loaded;
-} else {
-    this.controller = new DomusController();
-}
+        // Tenta carregar estado guardado; se não existir, cria novo
+        DomusController loaded = StateManager.load();
+        this.controller = (loaded != null) ? loaded : new DomusController();
+
         this.mainUI       = new MainUI();
         this.userUI       = new UserUI();
         this.houseUI      = new HouseUI();
@@ -52,7 +49,6 @@ if (loaded != null) {
                 case 1 -> handleLogin();
                 case 2 -> handleRegister();
                 case 3 -> {
-                    // Guarda sempre ao sair
                     StateManager.save(controller);
                     mainUI.showGoodbye();
                 }
@@ -67,7 +63,6 @@ if (loaded != null) {
     // Trata o login — autentica o utilizador e entra no dashboard
     private void handleLogin() {
         String[] data = mainUI.readLoginData();
-        // data: [0]=email, [1]=password
         User user = controller.getUsers().stream()
                 .filter(u -> u.getEmail().equals(data[0]))
                 .findFirst().orElse(null);
@@ -87,14 +82,11 @@ if (loaded != null) {
     private void handleRegister() {
         try {
             String[] data = mainUI.readRegisterData();
-            // data: [0]=id, [1]=nome, [2]=email, [3]=password
 
-            // Verifica id duplicado
             if (controller.getUserById(data[0]) != null) {
                 mainUI.showError("Já existe um utilizador com o ID '" + data[0] + "'.");
                 return;
             }
-            // Verifica email duplicado
             boolean emailExists = controller.getUsers().stream()
                     .anyMatch(u -> u.getEmail().equals(data[2]));
             if (emailExists) {
@@ -102,9 +94,9 @@ if (loaded != null) {
                 return;
             }
 
-            controller.addUser(new User(data[0], data[1], data[2], data[3]));
+            controller.addUser(new User(data[0], data[1], data[2], data[3], emailExists));
             StateManager.save(controller);
-            mainUI.showSuccess("Utilizador '" + data[1] + "' registado com sucesso. Pode fazer login.");
+            mainUI.showSuccess("Utilizador '" + data[1] + "' registado. Pode fazer login.");
         } catch (IllegalArgumentException e) {
             mainUI.showError(e.getMessage());
         }
@@ -114,9 +106,9 @@ if (loaded != null) {
     // DASHBOARD PÓS-LOGIN
     // =========================================================================
 
-    // Determina se o utilizador logado é administrador de pelo menos uma casa
+    // Verifica se o utilizador logado é administrador
     private boolean isAdmin() {
-        return !loggedUser.getOwnedHouses().isEmpty();
+        return loggedUser.isAdmin();
     }
 
     // Menu principal após login — opções diferem consoante o papel
@@ -138,21 +130,22 @@ if (loaded != null) {
                     // case 7 = Logout
                 }
             } else {
-                // Menu de usufrutuário — sem gestão de casas/dispositivos/automações
+                // Menu de usufrutuário
                 switch (choice) {
                     case 1 -> viewHousesOnly();
-                    case 2 -> { handleDevicesGuest(); StateManager.save(controller); }
+                    case 2 -> { handleDevicesGuest();   StateManager.save(controller); }
                     case 3 -> { handleScenariosGuest(); StateManager.save(controller); }
-                    case 4 -> { handleTime();           StateManager.save(controller); }
-                    // case 5 = Logout
+                    case 4 -> { handleTime();            StateManager.save(controller); }
+                    case 5 -> {
+                        // Promove o utilizador a administrador
+                        loggedUser.setAdmin(true);
+                        StateManager.save(controller);
+                        mainUI.showSuccess("És agora administrador!");
+                    }
+                    // case 6 = Logout
                 }
             }
-        } while (admin() ? choice != 7 : choice != 5);
-    }
-
-    // Auxiliar para evitar chamar isAdmin() duas vezes no loop
-    private boolean admin() {
-        return loggedUser != null && !loggedUser.getOwnedHouses().isEmpty();
+        } while (isAdmin() ? choice != 7 : choice != 6);
     }
 
     // =========================================================================
@@ -178,7 +171,7 @@ if (loaded != null) {
                 userUI.showError("Já existe um utilizador com o ID '" + data[0] + "'.");
                 return;
             }
-            controller.addUser(new User(data[0], data[1], data[2], data[3]));
+            controller.addUser(new User(data[0], data[1], data[2], data[3], null));
             userUI.showSuccess("Utilizador '" + data[1] + "' criado.");
         } catch (IllegalArgumentException e) {
             userUI.showError(e.getMessage());
@@ -241,7 +234,6 @@ if (loaded != null) {
             String[] data = houseUI.readRoomData();
             House house = controller.getHouseById(data[0]);
             if (house == null) { houseUI.showError("Casa não encontrada."); return; }
-            // Só o dono pode adicionar divisões
             if (!loggedUser.isAdminOf(house)) {
                 houseUI.showError("Não tens permissão para gerir esta casa."); return;
             }
@@ -334,7 +326,7 @@ if (loaded != null) {
     private void createDevice() {
         try {
             String[] data = deviceUI.readDeviceData();
-            String type = data[0]; String id = data[1];
+            String type  = data[0]; String id   = data[1];
             String brand = data[2]; String model = data[3];
             double power = Double.parseDouble(data[4]);
 
@@ -441,7 +433,7 @@ if (loaded != null) {
     }
 
     // =========================================================================
-    // CENÁRIOS (administrador — gestão completa)
+    // CENÁRIOS
     // =========================================================================
 
     private void handleScenarios() {
@@ -457,7 +449,6 @@ if (loaded != null) {
         } while (choice != 5);
     }
 
-    // Cenários para usufrutuário — só criar os seus próprios e executar
     private void handleScenariosGuest() {
         Menu guestMenu = new Menu("Cenários", new String[]{
             "Criar cenário",

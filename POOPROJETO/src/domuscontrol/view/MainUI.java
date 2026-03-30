@@ -38,28 +38,30 @@ public class MainUI {
 
     // Mostra o menu pós-login e devolve a opção escolhida
     // adminMode = true → mostra opções de administração
-    public int showDashboard(String userName, boolean adminMode) {
-        String[] options = adminMode
-            ? new String[]{
-                "Gerir Casas",
-                "Gerir Dispositivos",
-                "Cenários",
-                "Automações e Escalonamentos",
-                "Avançar Tempo",
-                "Gerir Utilizadores",
-                "Logout"
-              }
-            : new String[]{
-                "Ver Casas",
-                "Controlar Dispositivos",
-                "Cenários",
-                "Avançar Tempo",
-                "Logout"
-              };
+  // Mostra o menu pós-login e devolve a opção escolhida
+public int showDashboard(String userName, boolean adminMode) {
+    String[] options = adminMode
+        ? new String[]{
+            "Gerir Casas",
+            "Gerir Dispositivos",
+            "Cenários",
+            "Automações e Escalonamentos",
+            "Avançar Tempo",
+            "Gerir Utilizadores",
+            "Logout"
+          }
+        : new String[]{
+            "Ver Casas",
+            "Controlar Dispositivos",
+            "Cenários",
+            "Avançar Tempo",
+            "Tornar-me Administrador",
+            "Logout"
+          };
 
-        Menu dashboard = new Menu("DomusControl — " + userName, options);
-        return dashboard.show();
-    }
+    Menu dashboard = new Menu("DomusControl — " + userName, options);
+    return dashboard.show();
+}
 
     // Mostra uma mensagem de despedida
     public void showGoodbye() {
