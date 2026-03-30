@@ -1,1 +1,2 @@
-melhorar a maneira que os menus funionam e todo o acho que o codigo base esta feito
+o crontrollertotal tem alguns erros para ser um modelo mvc tem algumas coisas que tinha que tar no view pleo menos duas.
+os menus tbm para navegar deviams er altereados de algma forma para ficarem mais legiveis.
