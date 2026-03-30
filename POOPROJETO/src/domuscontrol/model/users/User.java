@@ -30,15 +30,15 @@ public class User implements Serializable {
     // Indica se o utilizador é administrador do sistema
     private boolean admin;
 
-    public User(String id, String name, String email, String password, Boolean admin) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.ownedHouses = new ArrayList<>();
-        this.guestHouses = new ArrayList<>();
-        this.admin =false;
-    }
+    public User(String id, String name, String email, String password, boolean admin) {
+    this.id = id;
+    this.name = name;
+    this.email = email;
+    this.password = password;
+    this.ownedHouses = new ArrayList<>();
+    this.guestHouses = new ArrayList<>();
+    this.admin = admin;
+}
 
     // Adiciona uma casa à lista de casas administradas pelo utilizador
     public void addOwnedHouse(House house) {

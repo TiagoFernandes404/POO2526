@@ -1,10 +1,12 @@
 package domuscontrol.model.scenario;
+
 import domuscontrol.model.actions.Action;
 import domuscontrol.model.users.User;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-public class Scenario implements Serializable {
+
+public class Scenario implements Serializable, Cloneable {
     private static final long serialVersionUID = 1L;
 
     private String name;
@@ -35,6 +37,19 @@ public class Scenario implements Serializable {
     public void execute() {
         for (Action action : actions) {
             action.execute();
+        }
+    }
+
+    // Deep copy da lista de ações — o clone tem a sua própria lista
+    // mas as ações apontam para os mesmos dispositivos (intencional).
+    @Override
+    public Scenario clone() {
+        try {
+            Scenario copy = (Scenario) super.clone();
+            copy.actions = new ArrayList<>(this.actions);
+            return copy;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
         }
     }
 

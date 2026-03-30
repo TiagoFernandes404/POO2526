@@ -10,8 +10,8 @@ import domuscontrol.model.scenario.*;
 import domuscontrol.model.scheduling.Schedule;
 import domuscontrol.model.users.User;
 import domuscontrol.view.*;
+import java.util.List;
 
-// Orquestra as views e o DomusController - gere o fluxo da aplicação
 public class ControllerTotal {
 
     private final DomusController controller;
@@ -23,14 +23,11 @@ public class ControllerTotal {
     private final AutomationUI automationUI;
     private final TimeUI timeUI;
 
-    // Utilizador com sessão ativa
     private User loggedUser;
 
     public ControllerTotal() {
-        // Tenta carregar estado guardado; se não existir, cria novo
         DomusController loaded = StateManager.load();
         this.controller = (loaded != null) ? loaded : new DomusController();
-
         this.mainUI       = new MainUI();
         this.userUI       = new UserUI();
         this.houseUI      = new HouseUI();
@@ -40,7 +37,13 @@ public class ControllerTotal {
         this.timeUI       = new TimeUI();
     }
 
-    // Arranca a aplicação — menu de entrada (login/registar/sair)
+    // Converte o tempo atual da simulação em minutos totais (para estatísticas)
+    private int currentTotalMinutes() {
+        return controller.getTime().getDay() * 24 * 60
+             + controller.getTime().getHour() * 60
+             + controller.getTime().getMinute();
+    }
+
     public void run() {
         int choice;
         do {
@@ -60,29 +63,24 @@ public class ControllerTotal {
     // LOGIN E REGISTO
     // =========================================================================
 
-    // Trata o login — autentica o utilizador e entra no dashboard
     private void handleLogin() {
         String[] data = mainUI.readLoginData();
         User user = controller.getUsers().stream()
                 .filter(u -> u.getEmail().equals(data[0]))
                 .findFirst().orElse(null);
-
         if (user == null || !user.checkPassword(data[1])) {
             mainUI.showError("Email ou password incorretos.");
             return;
         }
-
         loggedUser = user;
         mainUI.showSuccess("Bem-vindo, " + user.getName() + "!");
         handleDashboard();
-        loggedUser = null; // limpa sessão após logout
+        loggedUser = null;
     }
 
-    // Regista um novo utilizador
     private void handleRegister() {
         try {
             String[] data = mainUI.readRegisterData();
-
             if (controller.getUserById(data[0]) != null) {
                 mainUI.showError("Já existe um utilizador com o ID '" + data[0] + "'.");
                 return;
@@ -93,8 +91,7 @@ public class ControllerTotal {
                 mainUI.showError("Já existe um utilizador com o email '" + data[2] + "'.");
                 return;
             }
-
-            controller.addUser(new User(data[0], data[1], data[2], data[3], emailExists));
+            controller.addUser(new User(data[0], data[1], data[2], data[3], false));
             StateManager.save(controller);
             mainUI.showSuccess("Utilizador '" + data[1] + "' registado. Pode fazer login.");
         } catch (IllegalArgumentException e) {
@@ -103,41 +100,36 @@ public class ControllerTotal {
     }
 
     // =========================================================================
-    // DASHBOARD PÓS-LOGIN
+    // DASHBOARD
     // =========================================================================
 
-    // Verifica se o utilizador logado é administrador
     private boolean isAdmin() {
         return loggedUser.isAdmin();
     }
 
-    // Menu principal após login — opções diferem consoante o papel
     private void handleDashboard() {
         int choice;
         do {
             boolean admin = isAdmin();
             choice = mainUI.showDashboard(loggedUser.getName(), admin);
-
             if (admin) {
-                // Menu de administrador
                 switch (choice) {
-                    case 1 -> { handleHouses();      StateManager.save(controller); }
-                    case 2 -> { handleDevices();     StateManager.save(controller); }
-                    case 3 -> { handleScenarios();   StateManager.save(controller); }
-                    case 4 -> { handleAutomations(); StateManager.save(controller); }
-                    case 5 -> { handleTime();        StateManager.save(controller); }
-                    case 6 -> { handleUsers();       StateManager.save(controller); }
-                    // case 7 = Logout
+                    case 1 -> { handleHouses();        StateManager.save(controller); }
+                    case 2 -> { handleDevices();       StateManager.save(controller); }
+                    case 3 -> { handleScenarios();     StateManager.save(controller); }
+                    case 4 -> { handleAutomations();   StateManager.save(controller); }
+                    case 5 -> { handleTime();          StateManager.save(controller); }
+                    case 6 -> { handleUsers();         StateManager.save(controller); }
+                    case 7 -> { handleStatistics();    StateManager.save(controller); }
+                    // case 8 = Logout
                 }
             } else {
-                // Menu de usufrutuário
                 switch (choice) {
                     case 1 -> viewHousesOnly();
                     case 2 -> { handleDevicesGuest();   StateManager.save(controller); }
                     case 3 -> { handleScenariosGuest(); StateManager.save(controller); }
                     case 4 -> { handleTime();            StateManager.save(controller); }
                     case 5 -> {
-                        // Promove o utilizador a administrador
                         loggedUser.setAdmin(true);
                         StateManager.save(controller);
                         mainUI.showSuccess("És agora administrador!");
@@ -145,11 +137,11 @@ public class ControllerTotal {
                     // case 6 = Logout
                 }
             }
-        } while (isAdmin() ? choice != 7 : choice != 6);
+        } while (isAdmin() ? choice != 8 : choice != 6);
     }
 
     // =========================================================================
-    // UTILIZADORES (só administradores)
+    // UTILIZADORES
     // =========================================================================
 
     private void handleUsers() {
@@ -171,7 +163,7 @@ public class ControllerTotal {
                 userUI.showError("Já existe um utilizador com o ID '" + data[0] + "'.");
                 return;
             }
-            controller.addUser(new User(data[0], data[1], data[2], data[3], null));
+            controller.addUser(new User(data[0], data[1], data[2], data[3], false));
             userUI.showSuccess("Utilizador '" + data[1] + "' criado.");
         } catch (IllegalArgumentException e) {
             userUI.showError(e.getMessage());
@@ -190,7 +182,7 @@ public class ControllerTotal {
     }
 
     // =========================================================================
-    // CASAS (só administradores)
+    // CASAS
     // =========================================================================
 
     private void handleHouses() {
@@ -207,7 +199,6 @@ public class ControllerTotal {
         } while (choice != 6);
     }
 
-    // Só lista casas — para usufrutuários
     private void viewHousesOnly() {
         houseUI.displayHouses(loggedUser.getAllHouses());
     }
@@ -276,7 +267,7 @@ public class ControllerTotal {
     }
 
     // =========================================================================
-    // DISPOSITIVOS (administrador — gestão completa)
+    // DISPOSITIVOS
     // =========================================================================
 
     private void handleDevices() {
@@ -295,7 +286,6 @@ public class ControllerTotal {
         } while (choice != 8);
     }
 
-    // Dispositivos para usufrutuário — só ligar/desligar e ver estado
     private void handleDevicesGuest() {
         Menu guestMenu = new Menu("Dispositivos", new String[]{
             "Listar dispositivos",
@@ -316,7 +306,6 @@ public class ControllerTotal {
         } while (choice != 5);
     }
 
-    // Lista só os dispositivos das casas do utilizador logado
     private void listDevicesOfUser() {
         loggedUser.getAllHouses().forEach(h ->
             h.getAllDevices().forEach(d -> System.out.println(d.getStatus()))
@@ -326,10 +315,9 @@ public class ControllerTotal {
     private void createDevice() {
         try {
             String[] data = deviceUI.readDeviceData();
-            String type  = data[0]; String id   = data[1];
+            String type  = data[0]; String id    = data[1];
             String brand = data[2]; String model = data[3];
             double power = Double.parseDouble(data[4]);
-
             if (controller.getDeviceById(id) != null) {
                 deviceUI.showError("Já existe um dispositivo com esse ID."); return;
             }
@@ -381,19 +369,21 @@ public class ControllerTotal {
         deviceUI.displayDevice(device);
     }
 
+    // ATUALIZADO: regista o tempo de início com o tempo atual da simulação
     private void turnOnDevice() {
         String id = deviceUI.readDeviceId();
         Device device = controller.getDeviceById(id);
         if (device == null) { deviceUI.showError("Dispositivo não encontrado."); return; }
-        device.turnOn();
+        device.turnOn(currentTotalMinutes());
         deviceUI.showSuccess("Dispositivo '" + id + "' ligado.");
     }
 
+    // ATUALIZADO: acumula o tempo ligado com o tempo atual da simulação
     private void turnOffDevice() {
         String id = deviceUI.readDeviceId();
         Device device = controller.getDeviceById(id);
         if (device == null) { deviceUI.showError("Dispositivo não encontrado."); return; }
-        device.turnOff();
+        device.turnOff(currentTotalMinutes());
         deviceUI.showSuccess("Dispositivo '" + id + "' desligado.");
     }
 
@@ -429,6 +419,66 @@ public class ControllerTotal {
             }
         } catch (IllegalArgumentException | UnsupportedOperationException e) {
             deviceUI.showError(e.getMessage());
+        }
+    }
+
+    // =========================================================================
+    // ESTATÍSTICAS (novo)
+    // =========================================================================
+
+    private void handleStatistics() {
+        Menu statsMenu = new Menu("Estatísticas", new String[]{
+            "Casa que mais consome",
+            "Top 3 dispositivos por ativações",
+            "Top 3 dispositivos por tempo ligado",
+            "Top 3 divisões com mais dispositivos",
+            "Voltar"
+        });
+        int choice;
+        do {
+            choice = statsMenu.show();
+            switch (choice) {
+                case 1 -> showHighestConsumingHouse();
+                case 2 -> showTopDevicesByActivations();
+                case 3 -> showTopDevicesByTime();
+                case 4 -> showTopRooms();
+            }
+        } while (choice != 5);
+    }
+
+    private void showHighestConsumingHouse() {
+        var house = controller.getHighestConsumingHouse();
+        if (house == null) { Menu.showMessage("Sem casas registadas."); return; }
+        Menu.showMessage("Casa que mais consome: " + house.getName()
+                + " — " + house.getTotalPowerConsumption() + " Wh");
+    }
+
+    private void showTopDevicesByActivations() {
+        List<Device> top = controller.getTopDevicesByActivations(3);
+        if (top.isEmpty()) { Menu.showMessage("Sem dispositivos registados."); return; }
+        Menu.showMessage("Top 3 por ativações:");
+        for (int i = 0; i < top.size(); i++) {
+            Device d = top.get(i);
+            Menu.showMessage((i + 1) + ". " + d.getId() + " — " + d.getActivationCount() + " ativações");
+        }
+    }
+
+    private void showTopDevicesByTime() {
+        List<Device> top = controller.getTopDevicesByTime(3);
+        if (top.isEmpty()) { Menu.showMessage("Sem dispositivos registados."); return; }
+        Menu.showMessage("Top 3 por tempo ligado:");
+        for (int i = 0; i < top.size(); i++) {
+            Device d = top.get(i);
+            Menu.showMessage((i + 1) + ". " + d.getId() + " — " + d.getTotalOnTime() + " minutos");
+        }
+    }
+
+    private void showTopRooms() {
+        List<String> top = controller.getTopRoomsByDeviceCount(3);
+        if (top.isEmpty()) { Menu.showMessage("Sem divisões registadas."); return; }
+        Menu.showMessage("Top 3 divisões com mais dispositivos:");
+        for (int i = 0; i < top.size(); i++) {
+            Menu.showMessage((i + 1) + ". " + top.get(i));
         }
     }
 
@@ -487,14 +537,11 @@ public class ControllerTotal {
                 .filter(s -> s.getName().equals(scenarioName))
                 .findFirst().orElse(null);
         if (scenario == null) { scenarioUI.showError("Cenário não encontrado."); return; }
-
         int actionType = scenarioUI.showActionMenu();
         if (actionType == 6) return;
-
         String[] actionData = scenarioUI.readActionData();
         Device device = controller.getDeviceById(actionData[0]);
         if (device == null) { scenarioUI.showError("Dispositivo não encontrado."); return; }
-
         try {
             switch (actionType) {
                 case 1 -> scenario.addAction(new TurnOnAction(device));
@@ -535,7 +582,7 @@ public class ControllerTotal {
     }
 
     // =========================================================================
-    // AUTOMAÇÕES E ESCALONAMENTOS (só administradores)
+    // AUTOMAÇÕES E ESCALONAMENTOS
     // =========================================================================
 
     private void handleAutomations() {
