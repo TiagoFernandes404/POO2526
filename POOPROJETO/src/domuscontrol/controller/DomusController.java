@@ -158,6 +158,20 @@ public class DomusController implements Serializable {
         return sorted.subList(0, Math.min(n, sorted.size()));
     }
 
+    // Retorna o consumo total do sistema (soma de todos os dispositivos ligados em todas as casas)
+    public double getTotalSystemConsumption() {
+        return houses.stream()
+                .mapToDouble(House::getTotalPowerConsumption)
+                .sum();
+    }
+
+    // Retorna o utilizador com mais casas (próprias + usufrutuárias)
+    public User getUserWithMostHouses() {
+        return users.stream()
+                .max(Comparator.comparingInt(u -> u.getAllHouses().size()))
+                .orElse(null);
+    }
+
     // Retorna as n divisões com mais dispositivos (com o nome da casa)
     public List<String> getTopRoomsByDeviceCount(int n) {
         List<String> result = new ArrayList<>();

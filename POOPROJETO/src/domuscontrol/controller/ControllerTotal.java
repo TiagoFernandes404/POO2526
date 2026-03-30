@@ -10,7 +10,6 @@ import domuscontrol.model.scenario.*;
 import domuscontrol.model.scheduling.Schedule;
 import domuscontrol.model.users.User;
 import domuscontrol.view.*;
-import java.util.List;
 
 public class ControllerTotal {
 
@@ -22,6 +21,7 @@ public class ControllerTotal {
     private final ScenarioUI scenarioUI;
     private final AutomationUI automationUI;
     private final TimeUI timeUI;
+    private final StatisticsUI statisticsUI;
 
     private User loggedUser;
 
@@ -35,9 +35,9 @@ public class ControllerTotal {
         this.scenarioUI   = new ScenarioUI();
         this.automationUI = new AutomationUI();
         this.timeUI       = new TimeUI();
+        this.statisticsUI = new StatisticsUI();
     }
 
-    // Converte o tempo atual da simulação em minutos totais (para estatísticas)
     private int currentTotalMinutes() {
         return controller.getTime().getDay() * 24 * 60
              + controller.getTime().getHour() * 60
@@ -369,7 +369,6 @@ public class ControllerTotal {
         deviceUI.displayDevice(device);
     }
 
-    // ATUALIZADO: regista o tempo de início com o tempo atual da simulação
     private void turnOnDevice() {
         String id = deviceUI.readDeviceId();
         Device device = controller.getDeviceById(id);
@@ -378,7 +377,6 @@ public class ControllerTotal {
         deviceUI.showSuccess("Dispositivo '" + id + "' ligado.");
     }
 
-    // ATUALIZADO: acumula o tempo ligado com o tempo atual da simulação
     private void turnOffDevice() {
         String id = deviceUI.readDeviceId();
         Device device = controller.getDeviceById(id);
@@ -423,63 +421,22 @@ public class ControllerTotal {
     }
 
     // =========================================================================
-    // ESTATÍSTICAS (novo)
+    // ESTATÍSTICAS
     // =========================================================================
 
     private void handleStatistics() {
-        Menu statsMenu = new Menu("Estatísticas", new String[]{
-            "Casa que mais consome",
-            "Top 3 dispositivos por ativações",
-            "Top 3 dispositivos por tempo ligado",
-            "Top 3 divisões com mais dispositivos",
-            "Voltar"
-        });
         int choice;
         do {
-            choice = statsMenu.show();
+            choice = statisticsUI.showMenu();
             switch (choice) {
-                case 1 -> showHighestConsumingHouse();
-                case 2 -> showTopDevicesByActivations();
-                case 3 -> showTopDevicesByTime();
-                case 4 -> showTopRooms();
+                case 1 -> statisticsUI.displayHighestConsumingHouse(controller.getHighestConsumingHouse());
+                case 2 -> statisticsUI.displayTopDevicesByActivations(controller.getTopDevicesByActivations(3));
+                case 3 -> statisticsUI.displayTopDevicesByTime(controller.getTopDevicesByTime(3));
+                case 4 -> statisticsUI.displayTopRooms(controller.getTopRoomsByDeviceCount(3));
+                case 5 -> statisticsUI.displayTotalSystemConsumption(controller.getTotalSystemConsumption());
+                case 6 -> statisticsUI.displayUserWithMostHouses(controller.getUserWithMostHouses());
             }
-        } while (choice != 5);
-    }
-
-    private void showHighestConsumingHouse() {
-        var house = controller.getHighestConsumingHouse();
-        if (house == null) { Menu.showMessage("Sem casas registadas."); return; }
-        Menu.showMessage("Casa que mais consome: " + house.getName()
-                + " — " + house.getTotalPowerConsumption() + " Wh");
-    }
-
-    private void showTopDevicesByActivations() {
-        List<Device> top = controller.getTopDevicesByActivations(3);
-        if (top.isEmpty()) { Menu.showMessage("Sem dispositivos registados."); return; }
-        Menu.showMessage("Top 3 por ativações:");
-        for (int i = 0; i < top.size(); i++) {
-            Device d = top.get(i);
-            Menu.showMessage((i + 1) + ". " + d.getId() + " — " + d.getActivationCount() + " ativações");
-        }
-    }
-
-    private void showTopDevicesByTime() {
-        List<Device> top = controller.getTopDevicesByTime(3);
-        if (top.isEmpty()) { Menu.showMessage("Sem dispositivos registados."); return; }
-        Menu.showMessage("Top 3 por tempo ligado:");
-        for (int i = 0; i < top.size(); i++) {
-            Device d = top.get(i);
-            Menu.showMessage((i + 1) + ". " + d.getId() + " — " + d.getTotalOnTime() + " minutos");
-        }
-    }
-
-    private void showTopRooms() {
-        List<String> top = controller.getTopRoomsByDeviceCount(3);
-        if (top.isEmpty()) { Menu.showMessage("Sem divisões registadas."); return; }
-        Menu.showMessage("Top 3 divisões com mais dispositivos:");
-        for (int i = 0; i < top.size(); i++) {
-            Menu.showMessage((i + 1) + ". " + top.get(i));
-        }
+        } while (choice != 7);
     }
 
     // =========================================================================
