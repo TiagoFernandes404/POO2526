@@ -26,7 +26,7 @@ public class House implements Serializable {
     // Lista de utilizadores da casa
     private final List<User> users;
 
-    public House(String id, String name, String address, User admin) {
+    public House(String id, String name, String address, User admin) { // assume que admins são users
         this.id = id;
         this.name = name;
         this.address = address;

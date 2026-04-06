@@ -57,4 +57,11 @@ public class Room implements Serializable {
     public String toString() {
         return String.format("Divisão: %s (%d dispositivos)", name, devices.size());
     }
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Room room = (Room) o;
+        return name.equals(room.name);
+    }
 }
