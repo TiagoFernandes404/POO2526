@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 public class DomusController implements Serializable {
 
@@ -174,17 +175,15 @@ public class DomusController implements Serializable {
 
     // Retorna as n divisões com mais dispositivos (com o nome da casa)
     public List<String> getTopRoomsByDeviceCount(int n) {
-        List<String> result = new ArrayList<>();
-        for (House house : houses) {
-            for (Room room : house.getRooms()) {
-                result.add(house.getName() + " › " + room.getName() + " (" + room.getDeviceCount() + " dispositivos)");
-            }
-        }
-        result.sort((a, b) -> {
-            int countA = Integer.parseInt(a.replaceAll(".*\\((\\d+).*", "$1"));
-            int countB = Integer.parseInt(b.replaceAll(".*\\((\\d+).*", "$1"));
-            return Integer.compare(countB, countA);
-        });
-        return result.subList(0, Math.min(n, result.size()));
-    }
+
+    return houses.stream().flatMap(house ->house.getRooms().stream().map(room -> Map.entry(house, room))) // associa cada room à sua casa
+    
+                 .sorted(Comparator.comparingInt((Map.Entry<House, Room> e) ->e.getValue().getDeviceCount()).reversed()) // sort pelo numero de devices (descendente)
+
+                 .limit(n) // top n rooms com mais devices
+
+                 .map(e ->e.getKey().getName() + " > " + e.getValue().getName() + " (" + e.getValue().getDeviceCount() + " dispositivos)") // output do formato
+
+                 .toList();
+}
 }

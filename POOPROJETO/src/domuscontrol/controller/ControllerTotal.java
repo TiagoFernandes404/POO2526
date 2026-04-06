@@ -91,7 +91,7 @@ public class ControllerTotal {
                 mainUI.showError("Já existe um utilizador com o email '" + data[2] + "'.");
                 return;
             }
-            controller.addUser(new User(data[0], data[1], data[2], data[3], false));
+            controller.addUser(new User(data[0], data[1], data[2], data[3]));
             StateManager.save(controller);
             mainUI.showSuccess("Utilizador '" + data[1] + "' registado. Pode fazer login.");
         } catch (IllegalArgumentException e) {
@@ -103,16 +103,10 @@ public class ControllerTotal {
     // DASHBOARD
     // =========================================================================
 
-    private boolean isAdmin() {
-        return loggedUser.isAdmin();
-    }
-
     private void handleDashboard() {
         int choice;
         do {
-            boolean admin = isAdmin();
-            choice = mainUI.showDashboard(loggedUser.getName(), admin);
-            if (admin) {
+            choice = mainUI.showDashboard(loggedUser.getName());
                 switch (choice) {
                     case 1 -> { handleHouses();        StateManager.save(controller); }
                     case 2 -> { handleDevices();       StateManager.save(controller); }
@@ -121,23 +115,13 @@ public class ControllerTotal {
                     case 5 -> { handleTime();          StateManager.save(controller); }
                     case 6 -> { handleUsers();         StateManager.save(controller); }
                     case 7 -> { handleStatistics();    StateManager.save(controller); }
-                    // case 8 = Logout
-                }
-            } else {
-                switch (choice) {
-                    case 1 -> viewHousesOnly();
-                    case 2 -> { handleDevicesGuest();   StateManager.save(controller); }
-                    case 3 -> { handleScenariosGuest(); StateManager.save(controller); }
-                    case 4 -> { handleTime();            StateManager.save(controller); }
-                    case 5 -> {
-                        loggedUser.setAdmin(true);
-                        StateManager.save(controller);
-                        mainUI.showSuccess("És agora administrador!");
-                    }
-                    // case 6 = Logout
-                }
+                    case 8 -> viewHousesOnly();
+                    case 9 -> { handleDevicesGuest();   StateManager.save(controller); }
+                    case 10 -> { handleScenariosGuest(); StateManager.save(controller); }
+                    case 11 -> { handleTime();           StateManager.save(controller); }
+                    // case 12 = Logout
             }
-        } while (isAdmin() ? choice != 8 : choice != 6);
+        } while (choice < 12);
     }
 
     // =========================================================================
@@ -163,7 +147,7 @@ public class ControllerTotal {
                 userUI.showError("Já existe um utilizador com o ID '" + data[0] + "'.");
                 return;
             }
-            controller.addUser(new User(data[0], data[1], data[2], data[3], false));
+            controller.addUser(new User(data[0], data[1], data[2], data[3]));
             userUI.showSuccess("Utilizador '" + data[1] + "' criado.");
         } catch (IllegalArgumentException e) {
             userUI.showError(e.getMessage());
@@ -211,7 +195,7 @@ public class ControllerTotal {
             }
             User owner = controller.getUserById(data[3]);
             if (owner == null) { houseUI.showError("Utilizador não encontrado."); return; }
-            House house = new House(data[0], data[1], data[2]);
+            House house = new House(data[0], data[1], data[2], owner);
             controller.addHouse(house);
             owner.addOwnedHouse(house);
             houseUI.showSuccess("Casa '" + data[1] + "' criada.");
@@ -260,6 +244,7 @@ public class ControllerTotal {
             User guest = controller.getUserById(data[1]);
             if (guest == null) { houseUI.showError("Utilizador não encontrado."); return; }
             guest.addGuestHouse(house);
+            house.addUser(guest);
             houseUI.showSuccess(guest.getName() + " adicionado como convidado.");
         } catch (IllegalArgumentException e) {
             houseUI.showError(e.getMessage());

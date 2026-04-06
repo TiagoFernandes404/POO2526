@@ -37,9 +37,9 @@ public class MainUI {
     }
 
     // Mostra o menu pós-login e devolve a opção escolhida
-    public int showDashboard(String userName, boolean adminMode) {
-        String[] options = adminMode
-            ? new String[]{
+    public int showDashboard(String userName) {
+        String[] options =
+            new String[]{
                 "Gerir Casas",
                 "Gerir Dispositivos",
                 "Cenários",
@@ -47,14 +47,10 @@ public class MainUI {
                 "Avançar Tempo",
                 "Gerir Utilizadores",
                 "Estatísticas",
-                "Logout"
-              }
-            : new String[]{
                 "Ver Casas",
                 "Controlar Dispositivos",
                 "Cenários",
                 "Avançar Tempo",
-                "Tornar-me Administrador",
                 "Logout"
               };
 

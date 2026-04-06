@@ -27,18 +27,14 @@ public class User implements Serializable {
     // Lista de casas em que o utilizador é apenas usufrutuário
     private final List<House> guestHouses;
 
-    // Indica se o utilizador é administrador do sistema
-    private boolean admin;
-
-    public User(String id, String name, String email, String password, boolean admin) {
+    public User(String id, String name, String email, String password) {
     this.id = id;
     this.name = name;
     this.email = email;
     this.password = password;
     this.ownedHouses = new ArrayList<>();
     this.guestHouses = new ArrayList<>();
-    this.admin = admin;
-}
+    }
 
     // Adiciona uma casa à lista de casas administradas pelo utilizador
     public void addOwnedHouse(House house) {
@@ -48,7 +44,7 @@ public class User implements Serializable {
         ownedHouses.add(house);
     }
 
-    // Adiciona uma casa à lista de casas em que o utilizador é usufrutuário
+    // Adiciona uma casa à lista de casas em que o utilizador é usufruário
     public void addGuestHouse(House house) {
         if (house == null) {
             throw new IllegalArgumentException("A casa não pode ser nula.");
@@ -56,14 +52,9 @@ public class User implements Serializable {
         guestHouses.add(house);
     }
 
-    // Verifica se o utilizador é administrador de uma casa
-    public boolean isAdminOf(House house) {
-        return ownedHouses.contains(house);
-    }
-
-    // Verifica se o utilizador tem acesso a uma casa (admin ou usufrutuário)
-    public boolean hasAccessTo(House house) {
-        return ownedHouses.contains(house) || guestHouses.contains(house);
+    // Verifica se o utilizador é user de uma casa
+    public boolean isUser(House house) {
+        return guestHouses.contains(house);
     }
 
     // Retorna todas as casas a que o utilizador tem acesso
@@ -86,20 +77,42 @@ public class User implements Serializable {
     public List<House> getOwnedHouses() { return new ArrayList<>(ownedHouses); }
     public List<House> getGuestHouses() { return new ArrayList<>(guestHouses); }
 
+    public void setOwnedHouses(List<House> ownedHouses) {
+        if (ownedHouses == null) {
+            throw new IllegalArgumentException("A lista de casas não pode ser nula.");
+        }
+        this.ownedHouses.clear();
+        this.ownedHouses.addAll(ownedHouses);
+    }
+
+    public void setGuestHouses(List<House> guestHouses) {
+        if (guestHouses == null) {
+            throw new IllegalArgumentException("A lista de casas não pode ser nula.");
+        }
+        this.guestHouses.clear();
+        this.guestHouses.addAll(guestHouses);
+    }
+
     // Verifica se a password está correta
     public boolean checkPassword(String password) {
         return this.password.equals(password);
-    
     }
 
     // Verifica se o utilizador é administrador
-public boolean isAdmin() { return admin; }
-
-// Define se o utilizador é administrador
-public void setAdmin(boolean admin) { this.admin = admin; }
+    public boolean isAdminOf(House house) {
+        return house != null && ownedHouses.contains(house);
+    }
 
     @Override
     public String toString() {
         return String.format("[%s] %s (%s)", id, name, email);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || this.getClass() != obj.getClass()) return false;
+        User other = (User) obj;
+        return id.equals(other.id) && email.equals(other.email) && name.equals(other.name) && password.equals(other.password) && ownedHouses.equals(other.ownedHouses) && guestHouses.equals(other.guestHouses);
     }
 }
