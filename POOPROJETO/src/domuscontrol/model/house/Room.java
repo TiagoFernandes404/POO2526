@@ -1,4 +1,3 @@
-// domuscontrol/model/house/Room.java
 package domuscontrol.model.house;
 
 import domuscontrol.model.devices.Device;
@@ -9,12 +8,18 @@ import java.util.List;
 public class Room implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    private final String id;
     private String name;
     private final List<Device> devices;
 
-    public Room(String name) {
+    public Room(String id, String name) {
+        this.id = id;
         this.name = name;
         this.devices = new ArrayList<>();
+    }
+
+    public String getId() {
+        return id;
     }
 
     public void addDevice(Device device) {
@@ -56,14 +61,13 @@ public class Room implements Serializable {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || getClass() != o.getClass())
+        if (!(o instanceof Room))
             return false;
-        Room room = (Room) o;
-        return name.equals(room.name);
+        return this.id.equals(((Room) o).id);
     }
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return id.hashCode();
     }
 }

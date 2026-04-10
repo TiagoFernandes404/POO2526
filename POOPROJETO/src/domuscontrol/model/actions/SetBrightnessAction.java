@@ -1,13 +1,14 @@
 package domuscontrol.model.actions;
 
-import domuscontrol.model.devices.SmartLight;
+import domuscontrol.model.devices.Device;
+import domuscontrol.model.devices.Dimmable;
 
 public class SetBrightnessAction implements Action {
     private static final long serialVersionUID = 1L;
-    private SmartLight light;
+    private Dimmable light;
     private int brightness;
 
-    public SetBrightnessAction(SmartLight light, int brightness) {
+    public SetBrightnessAction(Dimmable light, int brightness) {
         if (light == null)
             throw new IllegalArgumentException("A lâmpada não pode ser nula.");
         if (brightness < 0 || brightness > 100)
@@ -19,15 +20,17 @@ public class SetBrightnessAction implements Action {
     @Override
     public void execute(int currentMinute) {
         light.setBrightness(brightness);
-        if (brightness > 0)
-            light.turnOn(currentMinute);
-        else
-            light.turnOff(currentMinute);
+        if (light instanceof Device d) {
+            if (brightness > 0)
+                d.turnOn(currentMinute);
+            else
+                d.turnOff(currentMinute);
+        }
     }
 
     @Override
     public String toString() {
-        return "Definir brilho de " + light.toString() + " para " + brightness + "%";
+        return "Definir brilho para " + brightness + "%";
     }
 
     @Override

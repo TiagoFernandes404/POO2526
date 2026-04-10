@@ -41,7 +41,9 @@ public class DomusController implements Serializable {
         if (user == null)
             throw new IllegalArgumentException("Utilizador não pode ser nulo.");
         if (users.contains(user))
-            throw new IllegalArgumentException("Utilizador já existe.");
+            throw new IllegalArgumentException("Já existe um utilizador com o ID '" + user.getId() + "'.");
+        if (users.stream().anyMatch(u -> u.getEmail().equals(user.getEmail())))
+            throw new IllegalArgumentException("Já existe um utilizador com o email '" + user.getEmail() + "'.");
         users.add(user);
     }
 
@@ -221,6 +223,25 @@ public class DomusController implements Serializable {
                 .limit(n)
                 .map(e -> e.getKey().getName() + " › " + e.getValue().getName() + " (" + e.getValue().getDeviceCount()
                         + " dispositivos)")
+                .toList();
+    }
+
+    public List<Device> getTopDevicesByActivationsByHouse(House house, int n, int currentTotalMinutes) {
+        if (house == null)
+            throw new IllegalArgumentException("Casa não pode ser nula.");
+        return house.getAllDevices().stream()
+                .sorted(Comparator.comparingInt(Device::getActivationCount).reversed())
+                .limit(n)
+                .toList();
+    }
+
+    public List<Device> getTopDevicesByTimeByHouse(House house, int n, int currentTotalMinutes) {
+        if (house == null)
+            throw new IllegalArgumentException("Casa não pode ser nula.");
+        return house.getAllDevices().stream()
+                .sorted(Comparator.comparingInt(
+                        (Device d) -> d.getEffectiveTotalOnTime(currentTotalMinutes)).reversed())
+                .limit(n)
                 .toList();
     }
 }

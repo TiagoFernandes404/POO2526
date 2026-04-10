@@ -89,16 +89,6 @@ public class ControllerTotal {
     private void handleRegister() {
         try {
             String[] data = mainUI.readRegisterData();
-            if (controller.getUserById(data[0]) != null) {
-                mainUI.showError("Já existe um utilizador com o ID '" + data[0] + "'.");
-                return;
-            }
-            boolean emailExists = controller.getUsers().stream()
-                    .anyMatch(u -> u.getEmail().equals(data[2]));
-            if (emailExists) {
-                mainUI.showError("Já existe um utilizador com o email '" + data[2] + "'.");
-                return;
-            }
             controller.addUser(new RegularUser(data[0], data[1], data[2], data[3]));
             StateManager.save(controller);
             mainUI.showSuccess("Utilizador '" + data[1] + "' registado. Pode fazer login.");
@@ -289,7 +279,7 @@ public class ControllerTotal {
                 houseUI.showError("Já existe uma divisão com esse nome.");
                 return;
             }
-            house.addRoom(new Room(data[1]));
+            house.addRoom(new Room(data[0] + "_" + data[1], data[1]));
             houseUI.showSuccess("Divisão '" + data[1] + "' adicionada.");
         } catch (IllegalArgumentException e) {
             houseUI.showError(e.getMessage());
@@ -481,15 +471,15 @@ public class ControllerTotal {
         try {
             switch (choice) {
                 case 1 -> {
-                    if (!(device instanceof SmartLight l)) {
-                        deviceUI.showError("Não é lâmpada.");
+                    if (!(device instanceof Dimmable l)) {
+                        deviceUI.showError("Não é dimmable.");
                         return;
                     }
                     l.setBrightness(deviceUI.readBrightness());
                     deviceUI.showSuccess("Brilho definido.");
                 }
                 case 2 -> {
-                    if (!(device instanceof SmartLight l) || !l.hasColorSupport()) {
+                    if (!(device instanceof ColorAdjustable l) || !l.hasColorSupport()) {
                         deviceUI.showError("Lâmpada sem suporte de cor.");
                         return;
                     }
@@ -529,15 +519,35 @@ public class ControllerTotal {
             switch (choice) {
                 case 1 -> statisticsUI.displayHighestConsumingHouse(controller.getHighestConsumingHouse());
                 case 2 -> statisticsUI.displayTopDevicesByActivations(controller.getTopDevicesByActivations(3));
-
                 case 3 -> statisticsUI.displayTopDevicesByTime(
                         controller.getTopDevicesByTime(3, currentTotalMinutes()),
                         currentTotalMinutes());
                 case 4 -> statisticsUI.displayTopRooms(controller.getTopRoomsByDeviceCount(3));
                 case 5 -> statisticsUI.displayTotalSystemConsumption(controller.getTotalSystemConsumption());
                 case 6 -> statisticsUI.displayUserWithMostHouses(controller.getUserWithMostHouses());
+                case 7 -> {
+                    String houseId = statisticsUI.readHouseId();
+                    House house = controller.getHouseById(houseId);
+                    if (house == null) {
+                        statisticsUI.showError("Casa não encontrada.");
+                        break;
+                    }
+                    statisticsUI.displayTopDevicesByActivationsByHouse(
+                            house, controller.getTopDevicesByActivationsByHouse(house, 3, currentTotalMinutes()));
+                }
+                case 8 -> {
+                    String houseId = statisticsUI.readHouseId();
+                    House house = controller.getHouseById(houseId);
+                    if (house == null) {
+                        statisticsUI.showError("Casa não encontrada.");
+                        break;
+                    }
+                    statisticsUI.displayTopDevicesByTimeByHouse(
+                            house, controller.getTopDevicesByTimeByHouse(house, 3, currentTotalMinutes()),
+                            currentTotalMinutes());
+                }
             }
-        } while (choice != 7);
+        } while (choice != 9);
     }
 
     // =========================================================================
@@ -595,8 +605,8 @@ public class ControllerTotal {
                 case 1 -> scenario.addAction(new TurnOnAction(device));
                 case 2 -> scenario.addAction(new TurnOffAction(device));
                 case 3 -> {
-                    if (!(device instanceof SmartLight l)) {
-                        scenarioUI.showError("Não é lâmpada.");
+                    if (!(device instanceof Dimmable l)) {
+                        scenarioUI.showError("Não é dimmable.");
                         return;
                     }
                     scenario.addAction(new SetBrightnessAction(l, Integer.parseInt(actionData[1])));
