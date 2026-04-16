@@ -77,12 +77,10 @@ public abstract class User implements Serializable {
         return this.password.equals(password);
     }
 
-    // ✅ NOVO: getter protegido (só para uso interno/subclasses)
     protected String getPassword() {
         return password;
     }
 
-    // ✅ NOVO: promove este utilizador a AdminUser
     public AdminUser promote() {
         AdminUser admin = new AdminUser(getId(), getName(), getEmail(), getPassword());
         admin.setOwnedHouses(getOwnedHouses());

@@ -58,13 +58,13 @@ public class ControllerTotal {
             switch (choice) {
                 case 1 -> handleLogin();
                 case 2 -> handleRegister();
-                case 3 -> handleUsers();
-                case 4 -> {
+
+                case 3 -> {
                     StateManager.save(controller);
                     mainUI.showGoodbye();
                 }
             }
-        } while (choice != 4); // era != 3
+        } while (choice != 3);
     }
 
     // =========================================================================
@@ -90,6 +90,11 @@ public class ControllerTotal {
         try {
             String[] data = mainUI.readRegisterData();
             controller.addUser(new RegularUser(data[0], data[1], data[2], data[3]));
+
+            if (mainUI.askPromoteToAdmin()) {
+                promoteUserRegister(data[0]);
+            }
+
             StateManager.save(controller);
             mainUI.showSuccess("Utilizador '" + data[1] + "' registado. Pode fazer login.");
         } catch (IllegalArgumentException e) {
@@ -182,8 +187,24 @@ public class ControllerTotal {
         } while (choice != 5);
     }
 
+    /*
+     * essta so serve para o registo a outra serva para qunado estamos dentro de um
+     * admine quermos
+     * promover um user que nao o é
+     */
+    private void promoteUserRegister(String id) {
+        try {
+            controller.promoteToAdmin(id);
+            userUI.showSuccess("Utilizador '" + id + "' promovido a administrador.");
+        } catch (IllegalArgumentException e) {
+            userUI.showError(e.getMessage());
+        }
+    }
+
     private void promoteUser() {
+
         String id = userUI.readUserId();
+
         try {
             controller.promoteToAdmin(id);
             userUI.showSuccess("Utilizador '" + id + "' promovido a administrador.");
