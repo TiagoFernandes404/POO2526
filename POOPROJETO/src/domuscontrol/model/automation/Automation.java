@@ -36,14 +36,25 @@ public class Automation implements Serializable, Cloneable {
                 action.execute(currentMinute);
     }
 
+    /*
+     * Deep clone:
+     * - Lista de ações nova (não partilhada com o original).
+     * - Cada Action é também clonada.
+     * - A Condition NÃO é clonada porque, no design atual, é imutável após
+     * construção (sensor, operador e threshold são finais na prática).
+     * As ações continuam a apontar para os mesmos dispositivos — intencional.
+     */
     @Override
     public Automation clone() {
         try {
             Automation copy = (Automation) super.clone();
-            copy.actions = new ArrayList<>(this.actions);
+            copy.actions = new ArrayList<>();
+            for (Action a : this.actions) {
+                copy.actions.add(a.clone());
+            }
             return copy;
         } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
+            throw new AssertionError("Automation deve suportar clone()", e);
         }
     }
 
@@ -63,6 +74,24 @@ public class Automation implements Serializable, Cloneable {
         return active;
     }
 
+    /**
+     * Ativa a automação, permitindo que seja avaliada.
+     */
+    public void activate() {
+        this.active = true;
+    }
+
+    /**
+     * Desativa a automação, impedindo que seja avaliada.
+     */
+    public void deactivate() {
+        this.active = false;
+    }
+
+    /**
+     * @deprecated Usar activate() ou deactivate() em seu lugar.
+     */
+    @Deprecated
     public void setActive(boolean active) {
         this.active = active;
     }
@@ -72,7 +101,6 @@ public class Automation implements Serializable, Cloneable {
         return String.format("Automação: %s [%s] - %s", name, active ? "ativa" : "inativa", condition.getDescription());
     }
 
-    // Automation.java — adicionar
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

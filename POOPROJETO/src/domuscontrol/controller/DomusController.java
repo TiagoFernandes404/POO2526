@@ -66,12 +66,12 @@ public class DomusController implements Serializable {
             throw new IllegalArgumentException("Utilizador não encontrado: " + id);
         if (existing.isAdmin())
             throw new IllegalArgumentException("O utilizador já é administrador.");
-        AdminUser promoted = existing.promote();
+        AdminUser promoted = existing.promoteToAdminUser();
         int index = users.indexOf(existing);
         users.set(index, promoted);
-        // atualizar referências nas casas
+        // atualizar referências nas casas (agora através de promoteAdmin())
         for (House house : promoted.getOwnedHouses()) {
-            house.replaceAdmin(existing, promoted);
+            house.promoteAdmin(existing, promoted);
         }
     }
 

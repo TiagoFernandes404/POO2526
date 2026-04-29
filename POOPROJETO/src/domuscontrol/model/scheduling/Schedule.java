@@ -39,20 +39,29 @@ public class Schedule implements Serializable, Cloneable {
     public void evaluate(int currentHour, int currentMinute, int totalMinutes) {
         if (active && currentHour == hour && currentMinute == minute) {
             for (Action action : actions)
-                action.execute(totalMinutes); // totalMinutes para estatísticas
+                action.execute(totalMinutes);
             if (!repeating)
                 active = false;
         }
     }
 
+    /*
+     * Deep clone:
+     * - Lista de ações nova (não partilhada com o original).
+     * - Cada Action é também clonada.
+     * - As ações continuam a apontar para os mesmos dispositivos — intencional.
+     */
     @Override
     public Schedule clone() {
         try {
             Schedule copy = (Schedule) super.clone();
-            copy.actions = new ArrayList<>(this.actions);
+            copy.actions = new ArrayList<>();
+            for (Action a : this.actions) {
+                copy.actions.add(a.clone());
+            }
             return copy;
         } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
+            throw new AssertionError("Schedule deve suportar clone()", e);
         }
     }
 
@@ -76,6 +85,24 @@ public class Schedule implements Serializable, Cloneable {
         return active;
     }
 
+    /**
+     * Ativa o escalonamento, permitindo que as suas ações sejam executadas.
+     */
+    public void activate() {
+        this.active = true;
+    }
+
+    /**
+     * Desativa o escalonamento, impedindo que as suas ações sejam executadas.
+     */
+    public void deactivate() {
+        this.active = false;
+    }
+
+    /**
+     * @deprecated Usar activate() ou deactivate() em seu lugar.
+     */
+    @Deprecated
     public void setActive(boolean active) {
         this.active = active;
     }

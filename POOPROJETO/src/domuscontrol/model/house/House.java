@@ -107,7 +107,35 @@ public class House implements Serializable {
         return new ArrayList<>(admins);
     }
 
-    // substitui para admin
+    /**
+     * Promove um admin existente de RegularUser para AdminUser.
+     * Substitui a referência nas listas internas mantendo a ordem e a coerência.
+     *
+     * @param oldAdmin o User anterior (RegularUser a ser promovido)
+     * @param newAdmin o novo AdminUser promovido
+     * @throws IllegalArgumentException se oldAdmin não é admin desta casa
+     */
+    public void promoteAdmin(User oldAdmin, User newAdmin) {
+        if (oldAdmin == null || newAdmin == null)
+            throw new IllegalArgumentException("Admin antigo e novo não podem ser nulos.");
+        if (!isAdmin(oldAdmin))
+            throw new IllegalArgumentException("O utilizador não é administrador desta casa.");
+
+        int adminIndex = admins.indexOf(oldAdmin);
+        if (adminIndex >= 0)
+            admins.set(adminIndex, newAdmin);
+
+        int userIndex = users.indexOf(oldAdmin);
+        if (userIndex >= 0)
+            users.set(userIndex, newAdmin);
+    }
+
+    /**
+     * @deprecated Usar promoteAdmin() em seu lugar. Este método é perigoso
+     *             pois permite substituir qualquer utilizador por outro, não apenas
+     *             admins.
+     */
+    @Deprecated
     public void replaceAdmin(User oldUser, User newUser) {
         int adminIndex = admins.indexOf(oldUser);
         if (adminIndex >= 0)

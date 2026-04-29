@@ -77,12 +77,16 @@ public abstract class User implements Serializable {
         return this.password.equals(password);
     }
 
-    protected String getPassword() {
-        return password;
-    }
-
-    public AdminUser promote() {
-        AdminUser admin = new AdminUser(getId(), getName(), getEmail(), getPassword());
+    /**
+     * Promove este User para AdminUser, mantendo todas as credenciais e casas.
+     * NOTA: Este método é usado exclusivamente durante o processo de promoção de
+     * utilizador.
+     * A password é copiada internamente de forma segura (não exposta publicamente).
+     *
+     * @return novo AdminUser com mesmas credenciais e casas que este User
+     */
+    public AdminUser promoteToAdminUser() {
+        AdminUser admin = new AdminUser(getId(), getName(), getEmail(), this.password);
         admin.setOwnedHouses(getOwnedHouses());
         admin.setGuestHouses(getGuestHouses());
         return admin;

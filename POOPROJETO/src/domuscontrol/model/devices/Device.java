@@ -74,15 +74,39 @@ public abstract class Device implements Serializable, Cloneable {
         return totalOnTime;
     }
 
+    /**
+     * Define a marca do dispositivo com validação.
+     * 
+     * @param brand nome da marca (não pode ser nulo ou vazio)
+     * @throws IllegalArgumentException se brand é inválido
+     */
     public void setBrand(String brand) {
+        if (brand == null || brand.isBlank())
+            throw new IllegalArgumentException("A marca não pode ser nula ou vazia.");
         this.brand = brand;
     }
 
+    /**
+     * Define o modelo do dispositivo com validação.
+     * 
+     * @param model nome do modelo (não pode ser nulo ou vazio)
+     * @throws IllegalArgumentException se model é inválido
+     */
     public void setModel(String model) {
+        if (model == null || model.isBlank())
+            throw new IllegalArgumentException("O modelo não pode ser nulo ou vazio.");
         this.model = model;
     }
 
+    /**
+     * Define o consumo de energia em watts/hora com validação.
+     * 
+     * @param p consumo em watts/hora (deve ser não-negativo)
+     * @throws IllegalArgumentException se p é negativo
+     */
     public void setPowerPerHour(double p) {
+        if (p < 0)
+            throw new IllegalArgumentException("O consumo de energia não pode ser negativo: " + p);
         this.powerPerHour = p;
     }
 

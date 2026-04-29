@@ -4,7 +4,6 @@ import domuscontrol.model.devices.*;
 import domuscontrol.model.house.House;
 import domuscontrol.model.house.Room;
 import domuscontrol.view.DeviceUI;
-
 import java.util.List;
 
 public class ControllerDevices {
@@ -60,10 +59,10 @@ public class ControllerDevices {
     private void createDevice() {
         try {
             String[] data = deviceUI.readDeviceData();
-            String type  = data[0];
-            String id    = data[1];
+            String type = data[0];
+            String id = data[1];
             String brand = data[2];
-            String mdl   = data[3];
+            String mdl = data[3];
             double power = Double.parseDouble(data[4]);
 
             if (model.getDeviceById(id) != null) {
@@ -80,7 +79,7 @@ public class ControllerDevices {
                 case "6" -> new RainSensor(id, brand, mdl, power);
                 case "7" -> new LightSensor(id, brand, mdl, power);
                 case "8" -> new TemperatureSensor(id, brand, mdl, power);
-                default  -> throw new IllegalArgumentException("Tipo inválido.");
+                default -> throw new IllegalArgumentException("Tipo inválido.");
             };
 
             model.addDevice(device);
@@ -91,6 +90,7 @@ public class ControllerDevices {
     }
 
     private void addDeviceToRoom() {
+
         try {
             String[] data = deviceUI.readAddToRoomData();
             House house = model.getHouseById(data[0]);

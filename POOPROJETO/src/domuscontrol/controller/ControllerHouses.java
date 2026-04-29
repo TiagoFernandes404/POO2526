@@ -58,6 +58,7 @@ public class ControllerHouses {
     }
 
     private void addRoom() {
+        houseUI.displayHouses(model.getHouses());
         try {
             String[] data = houseUI.readRoomData();
             House house = model.getHouseById(data[0]);

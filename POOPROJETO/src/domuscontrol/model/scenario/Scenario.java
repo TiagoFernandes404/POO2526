@@ -25,14 +25,13 @@ public class Scenario implements Serializable, Cloneable {
         this.actions = new ArrayList<>();
     }
 
-    // Adiciona uma ação ao cenário
+    // Adiciona uma ação ao cenário (cópia defensiva)
     public void addAction(Action action) {
         if (action == null)
             throw new IllegalArgumentException("A ação não pode ser nula.");
-        actions.add(action.clone()); // cópia defensiva da action
+        actions.add(action.clone());
     }
 
-    // Executa todas as ações do cenário pela ordem em que foram adicionadas
     // Executa todas as ações do cenário pela ordem em que foram adicionadas
     public void execute(int currentMinute) {
         for (Action action : actions) {
@@ -40,16 +39,26 @@ public class Scenario implements Serializable, Cloneable {
         }
     }
 
-    // Deep copy da lista de ações — o clone tem a sua própria lista
-    // mas as ações apontam para os mesmos dispositivos (intencional).
+    /*
+     * Deep clone:
+     * - É criada uma nova lista de ações (não partilhada com o original).
+     * - Cada Action é também clonada — assim, modificar uma ação no clone
+     * não afeta o original e vice-versa.
+     * - As ações continuam a apontar para os MESMOS dispositivos da casa,
+     * o que é intencional: ao executar o cenário clonado, ele deve atuar
+     * nos dispositivos reais e não em cópias deles.
+     */
     @Override
     public Scenario clone() {
         try {
             Scenario copy = (Scenario) super.clone();
-            copy.actions = new ArrayList<>(this.actions);
+            copy.actions = new ArrayList<>();
+            for (Action a : this.actions) {
+                copy.actions.add(a.clone());
+            }
             return copy;
         } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
+            throw new AssertionError("Scenario deve suportar clone()", e);
         }
     }
 

@@ -17,6 +17,7 @@ public abstract class Sensor extends Device {
 
     // Define o valor atual do sensor
     public void setValue(double value) {
+        validateValue(value);
         this.currentValue = value;
     }
 
@@ -30,10 +31,24 @@ public abstract class Sensor extends Device {
         return unit;
     }
 
-    
+    /**
+     * Valida o valor antes de ser atribuído.
+     * Subclasses podem sobrescrever para adicionar validação específica.
+     * 
+     * @param value valor a validar
+     * @throws IllegalArgumentException se value é inválido
+     */
+    protected void validateValue(double value) {
+        // Validação base: sensores não devem ter valores NaN ou Infinity
+        if (Double.isNaN(value) || Double.isInfinite(value))
+            throw new IllegalArgumentException("Valor inválido para sensor: " + value);
+    }
+
     @Override
-    public Sensor clone() { return (Sensor) super.clone(); }
-    
+    public Sensor clone() {
+        return (Sensor) super.clone();
+    }
+
     @Override
     public String getStatus() {
         return toString() + " | Valor: " + currentValue + " " + unit;
