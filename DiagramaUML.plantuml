@@ -1,0 +1,591 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+interface Action << interface >> {
+  + execute(int): void
+  + clone(): Action
+}
+class AdminUser {
+  - serialVersionUID: long
+  + isAdmin(): boolean
+  + getRole(): String
+  + canManageHouse(House): boolean
+}
+class ApertureDevice {
+  - openingPercentage: int
+  + close(int): void
+  + open(int): void
+  + clone(): ApertureDevice
+  + setOpeningPercentage(int, int): void
+  + getOpeningPercentage(): int
+  + getStatus(): String
+}
+class Automation {
+  - serialVersionUID: long
+  - condition: Condition
+  - actions: List<Action>
+  - name: String
+  - active: boolean
+  + getActions(): List<Action>
+  + isActive(): boolean
+  + evaluate(int): void
+  + getCondition(): Condition
+  + addAction(Action): void
+  + hashCode(): int
+  + equals(Object): boolean
+  + setActive(boolean): void
+  + clone(): Automation
+  + getName(): String
+  + toString(): String
+}
+class AutomationUI {
+  - menu: Menu
+  + showSuccess(String): void
+  + readAutomationData(): String[]
+  + readDeviceId(): String
+  + displayAutomations(List<Automation>): void
+  + displaySchedules(List<Schedule>): void
+  + readScheduleData(): String[]
+  + showError(String): void
+  + showMenu(): int
+}
+class Blinds {
+  + clone(): Blinds
+}
+interface ColorAdjustable << interface >> {
+  + setColorTemperature(int): void
+  + hasColorSupport(): boolean
+  + getColorTemperature(): int
+}
+interface Condition << interface >> {
+  + getDescription(): String
+  + isMet(): boolean
+}
+class ControllerAutomations {
+  - model: DomusController
+  - automationUI: AutomationUI
+  - evaluateAutomations(): void
+  + handle(): void
+  - listSchedules(): void
+  - listAutomations(): void
+  - createAutomation(): void
+  - createSchedule(): void
+}
+class ControllerDevices {
+  - model: DomusController
+  - deviceUI: DeviceUI
+  - main: ControllerTotal
+  - listDevices(): void
+  - controlDeviceAttributes(): void
+  + handle(): void
+  - addDeviceToRoom(): void
+  - turnOffDevice(): void
+  - viewDeviceStatus(): void
+  - listDevicesOfUser(): void
+  + handleGuest(): void
+  - createDevice(): void
+  - turnOnDevice(): void
+}
+class ControllerHouses {
+  - model: DomusController
+  - houseUI: HouseUI
+  - main: ControllerTotal
+  - addRoom(): void
+  - viewHouseDetails(): void
+  - addGuestToHouse(): void
+  + handle(): void
+  + viewHousesOnly(): void
+  - listHouses(): void
+  - createHouse(): void
+}
+class ControllerScenarios {
+  - model: DomusController
+  - scenarioUI: ScenarioUI
+  - main: ControllerTotal
+  - createScenario(): void
+  - executeScenario(): void
+  + handle(): void
+  - addActionToScenario(): void
+  - listScenarios(): void
+}
+class ControllerStatistics {
+  - model: DomusController
+  - statisticsUI: StatisticsUI
+  - main: ControllerTotal
+  + handle(): void
+}
+class ControllerTime {
+  - timeUI: TimeUI
+  - model: DomusController
+  + handle(): void
+}
+class ControllerTotal {
+  - controller: DomusController
+  - ctrlHouses: ControllerHouses
+  - mainUI: MainUI
+  - ctrlTime: ControllerTime
+  - ctrlUsers: ControllerUsers
+  - ctrlDevices: ControllerDevices
+  - loggedUser: User
+  - ctrlAutomations: ControllerAutomations
+  - ctrlScenarios: ControllerScenarios
+  - ctrlStatistics: ControllerStatistics
+  + currentTotalMinutes(): int
+  + run(): void
+  - handleDashboard(): void
+  - isAdmin(): boolean
+  + getLoggedUser(): User
+  - handleLogin(): void
+  - handleRegister(): void
+}
+class ControllerUsers {
+  - model: DomusController
+  - userUI: UserUI
+  + handle(): void
+  - viewUserDetails(): void
+  - promoteUser(): void
+  - createUser(): void
+  + promoteUserRegister(String): void
+  - listUsers(): void
+}
+class Device {
+  - model: String
+  - serialVersionUID: long
+  - powerPerHour: double
+  - on: boolean
+  - timeOnStart: int
+  - activationCount: int
+  - brand: String
+  - totalOnTime: int
+  - id: String
+  + getActivationCount(): int
+  + toString(): String
+  + getPowerPerHour(): double
+  + turnOn(int): void
+  + equals(Object): boolean
+  + isOn(): boolean
+  + getTotalOnTime(): int
+  + getEffectiveTotalOnTime(int): int
+  + getModel(): String
+  + hashCode(): int
+  + turnOff(int): void
+  + getId(): String
+  + setModel(String): void
+  + getStatus(): String
+  + getBrand(): String
+  + setBrand(String): void
+  + setPowerPerHour(double): void
+  + clone(): Device
+}
+class DeviceUI {
+  - menu: Menu
+  - controlMenu: Menu
+  - guestMenu: Menu
+  + displayDevices(List<Device>): void
+  + readOpeningPercentage(): int
+  + showMenu(): int
+  + readBrightness(): int
+  + showControlMenu(): int
+  + readAddToRoomData(): String[]
+  + showSuccess(String): void
+  + readDeviceData(): String[]
+  + showGuestMenu(): int
+  + showError(String): void
+  + readVolume(): int
+  + readColorTemperature(): int
+  + readDeviceId(): String
+  + displayDevice(Device): void
+}
+interface Dimmable << interface >> {
+  + getBrightness(): int
+  + setBrightness(int): void
+}
+class DomusController {
+  - serialVersionUID: long
+  - houses: List<House>
+  - devices: List<Device>
+  - users: List<User>
+  - scenarios: List<Scenario>
+  - time: TimeSimulator
+  - automations: List<Automation>
+  - schedules: List<Schedule>
+  + getTopDevicesByTime(int, int): List<Device>
+  + getTopRoomsByDeviceCount(int): List<String>
+  + getTopDevicesByActivationsByHouse(House, int, int): List<Device>
+  + getUserById(String): User
+  + getUsers(): List<User>
+  + tick(): void
+  + getTotalSystemConsumption(): double
+  + executeScenario(String, int): void
+  + getUserWithMostHouses(): User
+  + addSchedule(Schedule): void
+  + getHouses(): List<House>
+  + addDevice(Device): void
+  + evaluateSchedules(): void
+  + getSchedules(): List<Schedule>
+  + getHouseById(String): House
+  + getTopDevicesByActivations(int): List<Device>
+  + addUser(User): void
+  + getAllDevices(): List<Device>
+  + removeUser(String): boolean
+  + evaluateAutomations(): void
+  + getTime(): TimeSimulator
+  + promoteToAdmin(String): void
+  + getScenarios(): List<Scenario>
+  + addScenario(Scenario): void
+  + addAutomation(Automation): void
+  + getAutomations(): List<Automation>
+  + getHighestConsumingHouse(): House
+  + getTopDevicesByTimeByHouse(House, int, int): List<Device>
+  + removeDevice(String): boolean
+  + addHouse(House): void
+  + removeHouse(String): boolean
+  + getDeviceById(String): Device
+}
+class GarageDoor {
+  + clone(): GarageDoor
+}
+interface HasVolume << interface >> {
+  + setVolume(int): void
+  + getVolume(): int
+}
+class House {
+  - serialVersionUID: long
+  - admins: List<User>
+  - id: String
+  - rooms: List<Room>
+  - users: List<User>
+  - address: String
+  - name: String
+  + getAllDevices(): List<Device>
+  + toString(): String
+  + addUser(User): void
+  + getTotalPowerConsumption(): double
+  + getAddress(): String
+  + removeUser(User): boolean
+  + setName(String): void
+  + setAddress(String): void
+  + removeRoom(String): boolean
+  + replaceAdmin(User, User): void
+  + getUsers(): List<User>
+  + getId(): String
+  + hashCode(): int
+  + getRoomByName(String): Room
+  + getRooms(): List<Room>
+  + getAdmins(): List<User>
+  + getRoomCount(): int
+  + isAdmin(User): boolean
+  + addAdmin(User): void
+  + addRoom(Room): void
+  + removeAdmin(User): boolean
+  + getName(): String
+  + equals(Object): boolean
+}
+class HouseUI {
+  - menu: Menu
+  + readGuestData(): String[]
+  + displayHouseDetails(House): void
+  + readRoomData(): String[]
+  + readHouseId(): String
+  + displayHouses(List<House>): void
+  + showSuccess(String): void
+  + showError(String): void
+  + showMenu(): int
+  + readHouseData(): String[]
+}
+class LightSensor {
+  + clone(): LightSensor
+}
+class Main {
+  + main(String[]): void
+}
+class MainUI {
+  - menu: Menu
+  + showGoodbye(): void
+  + showError(String): void
+  + readLoginData(): String[]
+  + readRegisterData(): String[]
+  + showMenu(): int
+  + askPromoteToAdmin(): boolean
+  + showSuccess(String): void
+  + showDashboard(String, boolean): int
+}
+class Menu {
+  - options: String[]
+  - scanner: Scanner
+  - title: String
+  + readLine(String): String
+  + show(): int
+  + readDouble(String): double
+  + readInt(String): int
+  + showMessage(String): void
+}
+enum Operator << enumeration >> {
+  + GREATER_THAN: 
+  + LESS_THAN: 
+  + EQUALS: 
+  + values(): Operator[]
+  + valueOf(String): Operator
+}
+class RainSensor {
+  + clone(): RainSensor
+}
+class RegularUser {
+  - serialVersionUID: long
+  + isAdmin(): boolean
+  + getRole(): String
+  + canManageHouse(House): boolean
+}
+class Relay {
+  + getStatus(): String
+  + clone(): Relay
+}
+class Room {
+  - devices: List<Device>
+  - name: String
+  - id: String
+  - serialVersionUID: long
+  + hashCode(): int
+  + getId(): String
+  + removeDevice(String): boolean
+  + getName(): String
+  + getDeviceById(String): Device
+  + getDeviceCount(): int
+  + addDevice(Device): void
+  + getDevices(): List<Device>
+  + toString(): String
+  + equals(Object): boolean
+  + setName(String): void
+}
+class Scenario {
+  - name: String
+  - serialVersionUID: long
+  - actions: List<Action>
+  - owner: User
+  + getActions(): List<Action>
+  + hashCode(): int
+  + clone(): Scenario
+  + toString(): String
+  + getOwner(): User
+  + getName(): String
+  + addAction(Action): void
+  + execute(int): void
+  + equals(Object): boolean
+}
+class ScenarioUI {
+  - menu: Menu
+  - actionMenu: Menu
+  + readScenarioData(): String[]
+  + showSuccess(String): void
+  + readActionData(): String[]
+  + showMenu(): int
+  + readScenarioName(): String
+  + displayScenarios(List<Scenario>): void
+  + showActionMenu(): int
+  + showError(String): void
+}
+class Schedule {
+  - minute: int
+  - hour: int
+  - active: boolean
+  - actions: List<Action>
+  - serialVersionUID: long
+  - name: String
+  - repeating: boolean
+  + toString(): String
+  + clone(): Schedule
+  + addAction(Action): void
+  + isRepeating(): boolean
+  + getHour(): int
+  + evaluate(int, int, int): void
+  + getMinute(): int
+  + isActive(): boolean
+  + getActions(): List<Action>
+  + getName(): String
+  + setActive(boolean): void
+}
+class Sensor {
+  - currentValue: double
+  - unit: String
+  + getUnit(): String
+  + getValue(): double
+  + clone(): Sensor
+  + getStatus(): String
+  + setValue(double): void
+}
+class SensorCondition {
+  - sensor: Sensor
+  - threshold: double
+  - serialVersionUID: long
+  - operator: Operator
+  + getDescription(): String
+  + isMet(): boolean
+}
+class SetBrightnessAction {
+  - light: Dimmable
+  - brightness: int
+  - serialVersionUID: long
+  + execute(int): void
+  + clone(): SetBrightnessAction
+  + toString(): String
+}
+class SetOpeningAction {
+  - serialVersionUID: long
+  - device: ApertureDevice
+  - percentage: int
+  + execute(int): void
+  + toString(): String
+  + clone(): SetOpeningAction
+}
+class SetVolumeAction {
+  - serialVersionUID: long
+  - volume: int
+  - speaker: SmartSpeaker
+  + execute(int): void
+  + toString(): String
+  + clone(): SetVolumeAction
+}
+class SmartLight {
+  - brightness: int
+  - colorTemperature: int
+  - colorSupport: boolean
+  + setBrightness(int): void
+  + getColorTemperature(): int
+  + clone(): SmartLight
+  + hasColorSupport(): boolean
+  + setColorTemperature(int): void
+  + getBrightness(): int
+  + getStatus(): String
+}
+class SmartSpeaker {
+  - volume: int
+  + getVolume(): int
+  + clone(): SmartSpeaker
+  + setVolume(int): void
+  + getStatus(): String
+}
+class StateManager {
+  - FILE_NAME: String
+  + save(DomusController): void
+  + load(): DomusController?
+}
+class StatisticsUI {
+  - menu: Menu
+  + showError(String): void
+  + readHouseId(): String
+  + displayTopRooms(List<String>): void
+  + displayTotalSystemConsumption(double): void
+  + showMenu(): int
+  + displayUserWithMostHouses(User): void
+  + displayTopDevicesByTime(List<Device>, int): void
+  + displayTopDevicesByActivationsByHouse(House, List<Device>): void
+  + displayTopDevicesByTimeByHouse(House, List<Device>, int): void
+  + displayTopDevicesByActivations(List<Device>): void
+  + displayHighestConsumingHouse(House): void
+}
+class TemperatureSensor {
+  + clone(): TemperatureSensor
+}
+class TimeSimulator {
+  - serialVersionUID: long
+  - minute: int
+  - day: int
+  - hour: int
+  + getDay(): int
+  + advance(int): void
+  + getMinute(): int
+  + toString(): String
+  + tick(): void
+  + getHour(): int
+}
+class TimeUI {
+  - menu: Menu
+  + displayTime(String): void
+  + showMenu(): int
+  + readMinutes(): int
+  + showSuccess(String): void
+}
+class TurnOffAction {
+  - serialVersionUID: long
+  - device: Device
+  + toString(): String
+  + clone(): TurnOffAction
+  + execute(int): void
+}
+class TurnOnAction {
+  - serialVersionUID: long
+  - device: Device
+  + clone(): TurnOnAction
+  + toString(): String
+  + execute(int): void
+}
+class User {
+  - email: String
+  - password: String
+  - id: String
+  - name: String
+  - ownedHouses: List<House>
+  - serialVersionUID: long
+  - guestHouses: List<House>
+  + getName(): String
+  + getRole(): String
+  + setEmail(String): void
+  + setName(String): void
+  + setOwnedHouses(List<House>): void
+  + promote(): AdminUser
+  + getId(): String
+  + getEmail(): String
+  + hasAccessTo(House): boolean
+  + toString(): String
+  + getAllHouses(): List<House>
+  # getPassword(): String
+  + addGuestHouse(House): void
+  + canManageHouse(House): boolean
+  + hashCode(): int
+  + getGuestHouses(): List<House>
+  + addOwnedHouse(House): void
+  + getOwnedHouses(): List<House>
+  + setPassword(String): void
+  + checkPassword(String): boolean
+  + equals(Object): boolean
+  + isAdminOf(House): boolean
+  + isAdmin(): boolean
+  + setGuestHouses(List<House>): void
+}
+class UserUI {
+  - menu: Menu
+  + readUserData(): String[]
+  + readUserId(): String
+  + showMenu(): int
+  + showSuccess(String): void
+  + displayUser(User): void
+  + displayUsers(List<User>): void
+  + showError(String): void
+}
+
+AdminUser              -[#000082,plain]-^  User                  
+ApertureDevice         -[#000082,plain]-^  Device                
+Blinds                 -[#000082,plain]-^  ApertureDevice        
+GarageDoor             -[#000082,plain]-^  ApertureDevice        
+LightSensor            -[#000082,plain]-^  Sensor                
+Operator               +-[#820000,plain]-  SensorCondition       
+RainSensor             -[#000082,plain]-^  Sensor                
+RegularUser            -[#000082,plain]-^  User                  
+Relay                  -[#000082,plain]-^  Device                
+Sensor                 -[#000082,plain]-^  Device                
+SensorCondition        -[#008200,dashed]-^  Condition             
+SetBrightnessAction    -[#008200,dashed]-^  Action                
+SetOpeningAction       -[#008200,dashed]-^  Action                
+SetVolumeAction        -[#008200,dashed]-^  Action                
+SmartLight             -[#008200,dashed]-^  ColorAdjustable       
+SmartLight             -[#000082,plain]-^  Device                
+SmartLight             -[#008200,dashed]-^  Dimmable              
+SmartSpeaker           -[#000082,plain]-^  Device                
+SmartSpeaker           -[#008200,dashed]-^  HasVolume             
+TemperatureSensor      -[#000082,plain]-^  Sensor                
+TurnOffAction          -[#008200,dashed]-^  Action                
+TurnOnAction           -[#008200,dashed]-^  Action                
+@enduml
