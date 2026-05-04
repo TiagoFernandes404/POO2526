@@ -1,4 +1,5 @@
 package domuscontrol.view;
+
 import domuscontrol.model.users.User;
 import java.util.List;
 
@@ -7,24 +8,26 @@ public class UserUI {
     private final Menu menu;
 
     public UserUI() {
-        this.menu = new Menu("Gerir Utilizadores", new String[]{
-            "Criar utilizador",
-            "Listar utilizadores",
-            "Ver detalhes de utilizador",
-            "Promover a administrador",  
-            "Voltar"
+        this.menu = new Menu("Gerir Utilizadores", new String[] {
+                "Criar utilizador",
+                "Listar utilizadores",
+                "Ver detalhes de utilizador",
+                "Promover a administrador",
+                "Voltar"
         });
     }
 
-    public int showMenu() { return menu.show(); }
+    public int showMenu() {
+        return menu.show();
+    }
 
     public String[] readUserData() {
         System.out.println("\n--- Criar Utilizador ---");
-        String id       = Menu.readLine("ID: ");
-        String name     = Menu.readLine("Nome: ");
-        String email    = Menu.readLine("Email: ");
+        String id = Menu.readLine("ID: ");
+        String name = Menu.readLine("Nome: ");
+        String email = Menu.readLine("Email: ");
         String password = Menu.readLine("Password: ");
-        return new String[]{id, name, email, password};
+        return new String[] { id, name, email, password };
     }
 
     public String readUserId() {
@@ -33,8 +36,12 @@ public class UserUI {
 
     public void displayUsers(List<User> users) {
         System.out.println("\n--- Utilizadores ---");
-        if (users.isEmpty()) { System.out.println("Nenhum utilizador registado."); return; }
-        for (User u : users) System.out.println(u);
+        if (users.isEmpty()) {
+            System.out.println("Nenhum utilizador registado.");
+            return;
+        }
+        for (User u : users)
+            System.out.println(u);
     }
 
     public void displayUser(User user) {
@@ -48,6 +55,11 @@ public class UserUI {
         user.getGuestHouses().forEach(h -> System.out.println("  " + h));
     }
 
-    public void showSuccess(String message) { System.out.println("✓ " + message); }
-    public void showError(String message)   { System.out.println("✗ Erro: " + message); }
+    public void showSuccess(String message) {
+        System.out.println("Sucesso:" + message);
+    }
+
+    public void showError(String message) {
+        System.out.println("Erro: " + message);
+    }
 }

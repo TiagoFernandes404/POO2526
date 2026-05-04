@@ -10,20 +10,20 @@ public class ScenarioUI {
     private final Menu actionMenu;
 
     public ScenarioUI() {
-        this.menu = new Menu("Cenários", new String[]{
-            "Criar cenário",
-            "Adicionar ação a cenário",
-            "Listar cenários",
-            "Executar cenário",
-            "Voltar"
+        this.menu = new Menu("Cenários", new String[] {
+                "Criar cenário",
+                "Adicionar ação a cenário",
+                "Listar cenários",
+                "Executar cenário",
+                "Voltar"
         });
-        this.actionMenu = new Menu("Tipo de Ação", new String[]{
-            "Ligar dispositivo",
-            "Desligar dispositivo",
-            "Definir brilho",
-            "Definir volume",
-            "Definir abertura",
-            "Voltar"
+        this.actionMenu = new Menu("Tipo de Ação", new String[] {
+                "Ligar dispositivo",
+                "Desligar dispositivo",
+                "Definir brilho",
+                "Definir volume",
+                "Definir abertura",
+                "Voltar"
         });
     }
 
@@ -43,7 +43,7 @@ public class ScenarioUI {
         System.out.println("\n--- Criar Cenário ---");
         String name = Menu.readLine("Nome do cenário: ");
         String ownerId = Menu.readLine("ID do utilizador dono: ");
-        return new String[]{name, ownerId};
+        return new String[] { name, ownerId };
     }
 
     // Lê o nome de um cenário
@@ -56,7 +56,7 @@ public class ScenarioUI {
     public String[] readActionData() {
         String deviceId = Menu.readLine("ID do dispositivo: ");
         String value = Menu.readLine("Valor (Enter para ignorar): ");
-        return new String[]{deviceId, value};
+        return new String[] { deviceId, value };
     }
 
     // Mostra a lista de cenários
@@ -73,11 +73,11 @@ public class ScenarioUI {
 
     // Mostra mensagem de sucesso
     public void showSuccess(String message) {
-        System.out.println("✓ " + message);
+        System.out.println("Sucesso:" + message);
     }
 
     // Mostra mensagem de erro
     public void showError(String message) {
-        System.out.println("✗ Erro: " + message);
+        System.out.println("Erro: " + message);
     }
 }

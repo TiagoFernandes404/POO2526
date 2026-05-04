@@ -64,10 +64,10 @@ public class MainUI {
     }
 
     public void showError(String message) {
-        System.out.println("✗ Erro: " + message);
+        System.out.println("Erro: " + message);
     }
 
     public void showSuccess(String message) {
-        System.out.println("✓ " + message);
+        System.out.println("Sucesso:" + message);
     }
 }

@@ -118,6 +118,6 @@ public class StatisticsUI {
     }
 
     public void showError(String message) {
-        Menu.showMessage("✗ Erro: " + message);
+        Menu.showMessage("Erro: " + message);
     }
 }

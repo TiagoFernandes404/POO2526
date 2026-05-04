@@ -6,11 +6,11 @@ public class TimeUI {
     private final Menu menu;
 
     public TimeUI() {
-        this.menu = new Menu("Avançar Tempo", new String[]{
-            "Avançar 1 minuto",
-            "Avançar X minutos",
-            "Ver hora atual",
-            "Voltar"
+        this.menu = new Menu("Avançar Tempo", new String[] {
+                "Avançar 1 minuto",
+                "Avançar X minutos",
+                "Ver hora atual",
+                "Voltar"
         });
     }
 
@@ -31,6 +31,6 @@ public class TimeUI {
 
     // Mostra mensagem de sucesso
     public void showSuccess(String message) {
-        System.out.println("✓ " + message);
+        System.out.println("Sucesso: " + message);
     }
 }
