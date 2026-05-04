@@ -10,13 +10,13 @@ public class AutomationUI {
     private final Menu menu;
 
     public AutomationUI() {
-        this.menu = new Menu("Automações e Escalonamentos", new String[]{
-            "Criar automação",
-            "Listar automações",
-            "Avaliar automações",
-            "Criar escalonamento",
-            "Listar escalonamentos",
-            "Voltar"
+        this.menu = new Menu("Automações e Escalonamentos", new String[] {
+                "Criar automação",
+                "Listar automações",
+                "Avaliar automações",
+                "Criar escalonamento",
+                "Listar escalonamentos",
+                "Voltar"
         });
     }
 
@@ -34,7 +34,7 @@ public class AutomationUI {
         System.out.println("Operador: 1-> (maior)  2-< (menor)  3-= (igual)");
         String operator = Menu.readLine("Operador: ");
         String threshold = Menu.readLine("Valor limite: ");
-        return new String[]{name, sensorId, operator, threshold};
+        return new String[] { name, sensorId, operator, threshold };
     }
 
     // Lê os dados de um novo escalonamento
@@ -45,7 +45,7 @@ public class AutomationUI {
         String hour = Menu.readLine("Hora (0-23): ");
         String minute = Menu.readLine("Minuto (0-59): ");
         String repeating = Menu.readLine("Repetir todos os dias? (s/n): ");
-        return new String[]{name, hour, minute, repeating};
+        return new String[] { name, hour, minute, repeating };
     }
 
     // Lê o id de um dispositivo para associar a uma automação/escalonamento
@@ -79,11 +79,11 @@ public class AutomationUI {
 
     // Mostra mensagem de sucesso
     public void showSuccess(String message) {
-        System.out.println("✓ " + message);
+        System.out.println("Sucesso:" + message);
     }
 
     // Mostra mensagem de erro
     public void showError(String message) {
-        System.out.println("✗ Erro: " + message);
+        System.out.println("Erro: " + message);
     }
 }

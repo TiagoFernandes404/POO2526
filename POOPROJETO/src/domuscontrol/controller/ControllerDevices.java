@@ -112,7 +112,13 @@ public class ControllerDevices {
                 deviceUI.showError("Dispositivo não encontrado.");
                 return;
             }
+            // Verificar se o device já está atribuído
+            if (device.isUsed()) {
+                deviceUI.showError("Este dispositivo já está atribuído a uma divisão.");
+                return;
+            }
             room.addDevice(device);
+            device.setUsed(true); // Marca como utilizado
             deviceUI.showSuccess("Dispositivo adicionado à divisão '" + data[1] + "'.");
         } catch (IllegalArgumentException e) {
             deviceUI.showError(e.getMessage());

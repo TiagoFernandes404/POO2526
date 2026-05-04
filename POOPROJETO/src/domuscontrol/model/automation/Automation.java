@@ -38,6 +38,8 @@ public class Automation implements Serializable, Cloneable {
     }
 
     // Verifica se a condição se verifica e se sim, executa todas as ações
+    // basicamnete se vir que a conficao e feita vai executar o a acao que lhe esta
+    // associada
     public void evaluate(int currentMinute) {
         if (active && condition.isMet())
             for (Action action : actions)

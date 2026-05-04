@@ -12,6 +12,7 @@ public abstract class Device implements Serializable, Cloneable {
     private String model; // modelo
     private double powerPerHour; // consumo de energia em watts por hora
     private boolean on; // flag para saber se o dispositivo está ligado ou desligado
+    private boolean isUsed; // flag para saber se o dispositivo já foi atribuído a uma divisão
 
     // Variáveis para a parte de estatiicas
     private int activationCount; // quantas vezes foi ligado
@@ -24,6 +25,7 @@ public abstract class Device implements Serializable, Cloneable {
         this.model = model;
         this.powerPerHour = powerPerHour;
         this.on = false;
+        this.isUsed = false; // Começa como não utilizado
         this.activationCount = 0;
         this.totalOnTime = 0;
         this.timeOnStart = -1; // -1 significa que não está ligado
@@ -59,6 +61,16 @@ public abstract class Device implements Serializable, Cloneable {
 
     public abstract String getStatus();
 
+    // Retorna se o dispositivo já foi atribuído a uma divisão
+    public boolean isUsed() {
+        return isUsed;
+    }
+
+    // Define se o dispositivo foi atribuído a uma divisão
+    public void setUsed(boolean used) {
+        this.isUsed = used;
+    }
+
     public String getId() {
         return id;
     }
@@ -86,8 +98,8 @@ public abstract class Device implements Serializable, Cloneable {
     /**
      * Define a marca do dispositivo com validação.
      * 
-     * @param brand nome da marca (não pode ser nulo ou vazio)
-     * @throws IllegalArgumentException se brand é inválido
+     * nome da marca (não pode ser nulo ou vazio)
+     * IllegalArgumentException se brand é inválido
      */
     public void setBrand(String brand) {
         if (brand == null || brand.isBlank())
