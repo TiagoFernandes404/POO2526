@@ -90,36 +90,57 @@ public class ControllerDevices {
     }
 
     private void addDeviceToRoom() {
-
         try {
-            String[] data = deviceUI.readAddToRoomData();
-            House house = model.getHouseById(data[0]);
-            if (house == null) {
-                deviceUI.showError("Casa não encontrada.");
+            // Lista casas do admin
+            List<House> adminHouses = main.getLoggedUser().getAllHouses()
+                    .stream()
+                    .filter(h -> main.getLoggedUser().isAdminOf(h))
+                    .toList();
+
+            if (adminHouses.isEmpty()) {
+                deviceUI.showError("Nenhuma casa para administrar.");
                 return;
             }
-            if (!main.getLoggedUser().isAdminOf(house)) {
-                deviceUI.showError("Não tens permissão para gerir esta casa.");
+
+            deviceUI.displayHouses(adminHouses);
+            String houseChoice = deviceUI.getUserChoice("Escolhe a casa (número): ");
+            House house = adminHouses.get(Integer.parseInt(houseChoice) - 1);
+
+            // Lista divisões da casa
+            List<Room> rooms = house.getRooms();
+
+            if (rooms.isEmpty()) {
+                deviceUI.showError("Esta casa não tem divisões.");
                 return;
             }
-            Room room = house.getRoomByName(data[1]);
-            if (room == null) {
-                deviceUI.showError("Divisão não encontrada.");
+
+            deviceUI.displayRooms(rooms, house.getName());
+            String roomChoice = deviceUI.getUserChoice("Escolhe a divisão (número): ");
+            Room room = rooms.get(Integer.parseInt(roomChoice) - 1);
+
+            // Lista dispositivos não atribuídos
+            List<Device> availableDevices = model.getAllDevices()
+                    .stream()
+                    .filter(d -> !d.isUsed())
+                    .toList();
+
+            if (availableDevices.isEmpty()) {
+                deviceUI.showError("Nenhum dispositivo disponível.");
                 return;
             }
-            Device device = model.getDeviceById(data[2]);
-            if (device == null) {
-                deviceUI.showError("Dispositivo não encontrado.");
-                return;
-            }
-            // Verificar se o device já está atribuído
-            if (device.isUsed()) {
-                deviceUI.showError("Este dispositivo já está atribuído a uma divisão.");
-                return;
-            }
-            room.addDevice(device);
-            device.setUsed(true); // Marca como utilizado
-            deviceUI.showSuccess("Dispositivo adicionado à divisão '" + data[1] + "'.");
+
+            deviceUI.displayAvailableDevices(availableDevices);
+            String deviceChoice = deviceUI.getUserChoice("Escolhe o dispositivo (número): ");
+            Device device = availableDevices.get(Integer.parseInt(deviceChoice) - 1);
+
+            room.addDevice(device); // já marca como usado automaticamente
+            deviceUI.showSuccess("Dispositivo '" + device.getId()
+                    + "' adicionado à divisão '" + room.getName() + "'.");
+
+        } catch (IndexOutOfBoundsException e) {
+            deviceUI.showError("Opção inválida!");
+        } catch (NumberFormatException e) {
+            deviceUI.showError("Entrada inválida! Use números.");
         } catch (IllegalArgumentException e) {
             deviceUI.showError(e.getMessage());
         }
@@ -140,40 +161,81 @@ public class ControllerDevices {
     }
 
     private void turnOnDevice() {
-        String id = deviceUI.readDeviceId();
-        Device device = model.getDeviceById(id);
-        if (device == null) {
-            deviceUI.showError("Dispositivo não encontrado.");
-            return;
+        try {
+            // Lista dispositivos do utilizador com status
+            List<Device> userDevices = main.getLoggedUser().getAllHouses()
+                    .stream()
+                    .flatMap(h -> h.getAllDevices().stream())
+                    .toList();
+
+            if (userDevices.isEmpty()) {
+                deviceUI.showError("Nenhum dispositivo disponível.");
+                return;
+            }
+
+            deviceUI.displayDevicesWithStatus(userDevices);
+            String choice = deviceUI.getUserChoice("Escolhe o dispositivo (número): ");
+            Device device = userDevices.get(Integer.parseInt(choice) - 1);
+
+            device.turnOn(main.currentTotalMinutes());
+            deviceUI.showSuccess("Dispositivo '" + device.getId() + "' ligado.");
+
+        } catch (IndexOutOfBoundsException e) {
+            deviceUI.showError("Opção inválida!");
+        } catch (NumberFormatException e) {
+            deviceUI.showError("Entrada inválida! Use números.");
         }
-        device.turnOn(main.currentTotalMinutes());
-        deviceUI.showSuccess("Dispositivo '" + id + "' ligado.");
     }
 
     private void turnOffDevice() {
-        String id = deviceUI.readDeviceId();
-        Device device = model.getDeviceById(id);
-        if (device == null) {
-            deviceUI.showError("Dispositivo não encontrado.");
-            return;
+        try {
+            // Lista dispositivos do utilizador com status
+            List<Device> userDevices = main.getLoggedUser().getAllHouses()
+                    .stream()
+                    .flatMap(h -> h.getAllDevices().stream())
+                    .toList();
+
+            if (userDevices.isEmpty()) {
+                deviceUI.showError("Nenhum dispositivo disponível.");
+                return;
+            }
+
+            deviceUI.displayDevicesWithStatus(userDevices);
+            String choice = deviceUI.getUserChoice("Escolhe o dispositivo (número): ");
+            Device device = userDevices.get(Integer.parseInt(choice) - 1);
+
+            device.turnOff(main.currentTotalMinutes());
+            deviceUI.showSuccess("Dispositivo '" + device.getId() + "' desligado.");
+
+        } catch (IndexOutOfBoundsException e) {
+            deviceUI.showError("Opção inválida!");
+        } catch (NumberFormatException e) {
+            deviceUI.showError("Entrada inválida! Use números.");
         }
-        device.turnOff(main.currentTotalMinutes());
-        deviceUI.showSuccess("Dispositivo '" + id + "' desligado.");
     }
 
     private void controlDeviceAttributes() {
-        String id = deviceUI.readDeviceId();
-        Device device = model.getDeviceById(id);
-        if (device == null) {
-            deviceUI.showError("Dispositivo não encontrado.");
-            return;
-        }
-        int choice = deviceUI.showControlMenu();
         try {
-            switch (choice) {
+            // Lista dispositivos do utilizador com status
+            List<Device> userDevices = main.getLoggedUser().getAllHouses()
+                    .stream()
+                    .flatMap(h -> h.getAllDevices().stream())
+                    .toList();
+
+            if (userDevices.isEmpty()) {
+                deviceUI.showError("Nenhum dispositivo disponível.");
+                return;
+            }
+
+            deviceUI.displayDevicesWithStatus(userDevices);
+            String choice = deviceUI.getUserChoice("Escolhe o dispositivo (número): ");
+            Device device = userDevices.get(Integer.parseInt(choice) - 1);
+
+            int attrChoice = deviceUI.showControlMenu();
+            switch (attrChoice) {
                 case 1 -> {
                     if (!(device instanceof Dimmable l)) {
-                        deviceUI.showError("Não é dimmable.");
+                        deviceUI.showError("Este dispositivo não é dimmable.");
                         return;
                     }
                     l.setBrightness(deviceUI.readBrightness());
@@ -181,7 +243,7 @@ public class ControllerDevices {
                 }
                 case 2 -> {
                     if (!(device instanceof ColorAdjustable l) || !l.hasColorSupport()) {
-                        deviceUI.showError("Lâmpada sem suporte de cor.");
+                        deviceUI.showError("Este dispositivo não tem suporte de cor.");
                         return;
                     }
                     l.setColorTemperature(deviceUI.readColorTemperature());
@@ -189,7 +251,7 @@ public class ControllerDevices {
                 }
                 case 3 -> {
                     if (!(device instanceof SmartSpeaker s)) {
-                        deviceUI.showError("Não é coluna.");
+                        deviceUI.showError("Este dispositivo não é coluna.");
                         return;
                     }
                     s.setVolume(deviceUI.readVolume());
@@ -197,13 +259,17 @@ public class ControllerDevices {
                 }
                 case 4 -> {
                     if (!(device instanceof ApertureDevice a)) {
-                        deviceUI.showError("Sem controlo de abertura.");
+                        deviceUI.showError("Este dispositivo não tem controlo de abertura.");
                         return;
                     }
                     a.setOpeningPercentage(deviceUI.readOpeningPercentage(), main.currentTotalMinutes());
                     deviceUI.showSuccess("Abertura definida.");
                 }
             }
+        } catch (IndexOutOfBoundsException e) {
+            deviceUI.showError("Opção inválida!");
+        } catch (NumberFormatException e) {
+            deviceUI.showError("Entrada inválida! Use números.");
         } catch (IllegalArgumentException | UnsupportedOperationException e) {
             deviceUI.showError(e.getMessage());
         }

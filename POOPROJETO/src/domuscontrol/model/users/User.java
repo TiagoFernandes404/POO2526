@@ -16,7 +16,7 @@ public abstract class User implements Serializable {
     private String name;
     private String email;
     // palavra-passe guardada aqui (em produção seria encriptada!)
-    private String password;
+    private final String password;
     // casas que o utilizador é dono/admin
     private final List<House> ownedHouses;
     // casas que o utilizador pode apenas visitar (convidado)
@@ -134,10 +134,6 @@ public abstract class User implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public void setPassword(String pw) {
-        this.password = pw;
     }
 
     public List<House> getOwnedHouses() {

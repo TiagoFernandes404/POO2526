@@ -34,7 +34,10 @@ public class Room implements Serializable {
     public void addDevice(Device device) {
         if (device == null)
             throw new IllegalArgumentException("O dispositivo não pode ser nulo.");
+        if (device.isUsed())
+            throw new IllegalArgumentException("Este dispositivo já está atribuído a uma divisão.");
         devices.add(device);
+        device.setUsed(true); // ✅ Marca automaticamente como usado
     }
 
     // remove um device pelo ID, devolve true se encontrou e removeu

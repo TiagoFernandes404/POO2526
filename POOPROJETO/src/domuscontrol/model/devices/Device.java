@@ -66,7 +66,10 @@ public abstract class Device implements Serializable, Cloneable {
         return isUsed;
     }
 
-    // Define se o dispositivo foi atribuído a uma divisão
+    /**
+     * Define se o dispositivo foi atribuído a uma divisão.
+     * true se foi atribuído, false caso contrário
+     */
     public void setUsed(boolean used) {
         this.isUsed = used;
     }

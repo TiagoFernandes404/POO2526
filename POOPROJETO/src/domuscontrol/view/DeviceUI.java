@@ -46,7 +46,7 @@ public class DeviceUI {
 
     public int showGuestMenu() {
         return guestMenu.show();
-    } // ✅ NOVO
+    }
 
     public String[] readDeviceData() {
         System.out.println("\n--- Criar Dispositivo ---");
@@ -112,5 +112,43 @@ public class DeviceUI {
 
     public void showError(String message) {
         System.out.println("Erro: " + message);
+    }
+
+    public void displayHouses(java.util.List<domuscontrol.model.house.House> houses) {
+        System.out.println("\n--- Casas Disponíveis ---");
+        for (int i = 0; i < houses.size(); i++) {
+            System.out.println((i + 1) + ". " + houses.get(i).getName());
+        }
+    }
+
+    public void displayRooms(java.util.List<domuscontrol.model.house.Room> rooms, String houseName) {
+        System.out.println("\n--- Divisões de \"" + houseName + "\" ---");
+        for (int i = 0; i < rooms.size(); i++) {
+            System.out.println((i + 1) + ". " + rooms.get(i).getName() +
+                    " (" + rooms.get(i).getDeviceCount() + " dispositivos)");
+        }
+    }
+
+    public void displayAvailableDevices(java.util.List<Device> devices) {
+        System.out.println("\n--- Dispositivos Disponíveis (não atribuídos) ---");
+        for (int i = 0; i < devices.size(); i++) {
+            Device d = devices.get(i);
+            System.out.println((i + 1) + ". [" + d.getClass().getSimpleName() + "] " +
+                    d.getId() + " (" + d.getBrand() + ") - " + d.getPowerPerHour() + "W");
+        }
+    }
+
+    public void displayDevicesWithStatus(java.util.List<Device> devices) {
+        System.out.println("\n--- Dispositivos ---");
+        for (int i = 0; i < devices.size(); i++) {
+            Device d = devices.get(i);
+            String status = d.isOn() ? " ON" : " OFF";
+            System.out.println((i + 1) + ". " + d.getId() + " - " + status +
+                    " [" + d.getClass().getSimpleName() + "]");
+        }
+    }
+
+    public String getUserChoice(String prompt) {
+        return Menu.readLine(prompt);
     }
 }

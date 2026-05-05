@@ -14,9 +14,9 @@ public class SensorCondition implements Condition {
         EQUALS // =
     }
 
-    private Sensor sensor; // qual é o sensor
-    private Operator operator; // qual é a comparação
-    private double threshold; // com que valor compara
+    private final Sensor sensor; // qual é o sensor
+    private final Operator operator; // qual é a comparação
+    private final double threshold; // com que valor compara
 
     public SensorCondition(Sensor sensor, Operator operator, double threshold) {
         if (sensor == null) {
