@@ -23,6 +23,7 @@ public class PopulateStateManager {
 
         seedUtilizadores(ctrl);
         seedCasaFamiliaSilva(ctrl);
+        seedCasaVazia(ctrl);
         seedCasaHugo(ctrl);
         seedAutomacoes(ctrl);
         seedEscalonamentos(ctrl);
@@ -113,6 +114,14 @@ public class PopulateStateManager {
         garagem.addDevice(sensorLuz);
         sensorLuz.setUsed(true);
         casa.addRoom(garagem);
+    }
+
+    private static void seedCasaVazia(DomusController ctrl) {
+        AdminUser tiago = (AdminUser) ctrl.getUserById("1");
+
+        House casaVazia = new House("4", "Casa Vazia", "Rua do Deserto", tiago);
+        ctrl.addHouse(casaVazia);
+        tiago.addOwnedHouse(casaVazia);
     }
 
     private static void seedCasaHugo(DomusController ctrl) {
