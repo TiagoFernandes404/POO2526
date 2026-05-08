@@ -14,6 +14,8 @@ import domuscontrol.utils.actions.TurnOnAction;
 import domuscontrol.view.ScenarioUI;
 import java.util.List;
 
+// controlador dos cenários - um cenário é um conjunto de ações que o utilizador
+// pode executar de uma vez só (ex: sair de casa desliga tudo)
 public class ControllerScenarios {
 
     private final DomusController model;
@@ -39,6 +41,7 @@ public class ControllerScenarios {
         } while (choice != 5);
     }
 
+    // lista auxiliar de dispositivos para mostrar ao utilizador
     private List<String> deviceList() {
         return model.getAllDevices().stream()
                 .map(d -> "[" + d.getId() + "] " + d.getBrand() + " " + d.getModel()
@@ -51,6 +54,7 @@ public class ControllerScenarios {
                 .map(u -> "[" + u.getId() + "] " + u.getName()).toList();
     }
 
+    // lista só os nomes dos cenários para o utilizador escolher
     private List<String> scenarioList() {
         return model.getScenarios().stream()
                 .map(s -> s.getName()).toList();
@@ -73,6 +77,7 @@ public class ControllerScenarios {
 
     private void addActionToScenario() {
         String scenarioName = scenarioUI.readScenarioName(scenarioList());
+        // procuramos o cenário pelo nome
         Scenario scenario = model.getScenarios().stream()
                 .filter(s -> s.getName().equals(scenarioName))
                 .findFirst().orElse(null);
@@ -93,6 +98,7 @@ public class ControllerScenarios {
         }
 
         try {
+            // verificamos com instanceof se o dispositivo suporta a ação escolhida
             switch (actionType) {
                 case 1 -> scenario.addAction(new TurnOnAction(device));
                 case 2 -> scenario.addAction(new TurnOffAction(device));
@@ -133,6 +139,7 @@ public class ControllerScenarios {
     private void executeScenario() {
         String name = scenarioUI.readScenarioName(scenarioList());
         try {
+            // passamos o tempo atual para as ações registarem quando foram executadas
             model.executeScenario(name, main.currentTotalMinutes());
             scenarioUI.showSuccess("Cenário '" + name + "' executado.");
         } catch (IllegalArgumentException e) {

@@ -56,7 +56,7 @@ public class MainUI {
                         "Ver Casas", "Controlar Dispositivos",
                         "Cenários", "Avançar Tempo", "Logout"
                 };
-        return new Menu("DomusControl -- " + userName, options).show();
+        return new Menu("DomusControl — " + userName, options).show();
     }
 
     public void showGoodbye() {
@@ -68,6 +68,6 @@ public class MainUI {
     }
 
     public void showSuccess(String message) {
-        System.out.println("Sucesso: " + message);
+        System.out.println("Sucesso:" + message);
     }
 }

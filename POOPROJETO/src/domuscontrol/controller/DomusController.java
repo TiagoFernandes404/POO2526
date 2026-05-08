@@ -15,15 +15,19 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+// classe principal do modelo - guarda todas as coleções e a lógica de negócio
+// implementa Serializable para poder ser guardada em ficheiro binário
 public class DomusController implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    // todas as coleções principais do sistema
     private final List<User> users;
     private final List<House> houses;
     private final List<Device> devices;
     private final List<Automation> automations;
     private final List<Schedule> schedules;
     private final List<Scenario> scenarios;
+    // o simulador de tempo é guardado aqui para persistir entre sessões
     private final TimeSimulator time;
 
     public DomusController() {
@@ -56,10 +60,11 @@ public class DomusController implements Serializable {
     }
 
     public List<User> getUsers() {
-        return new ArrayList<>(users);
+        return new ArrayList<>(users); // devolvemos cópia para proteger a lista interna
     }
 
-    // promover um utilizador a administrador
+    // promover substitui o objeto RegularUser por um AdminUser na mesma posição
+    // assim mantemos a ordem da lista e não perdemos referências
     public void promoteToAdmin(String id) {
         User existing = getUserById(id);
         if (existing == null)
@@ -69,7 +74,6 @@ public class DomusController implements Serializable {
         AdminUser promoted = existing.promoteToAdminUser();
         int index = users.indexOf(existing);
         users.set(index, promoted);
-
     }
 
     // --- Casas ---
@@ -142,7 +146,7 @@ public class DomusController implements Serializable {
     public void evaluateSchedules() {
         int totalMinutes = time.getDay() * 24 * 60 + time.getHour() * 60 + time.getMinute();
         for (Schedule s : schedules) {
-            s.evaluate(time.getHour(), time.getMinute(), totalMinutes); // ← atualizado
+            s.evaluate(time.getHour(), time.getMinute(), totalMinutes);
         }
     }
 
@@ -170,6 +174,8 @@ public class DomusController implements Serializable {
     }
 
     // --- Tempo ---
+    // tick avança 1 minuto e avalia automações e escalonamentos automaticamente
+    // é chamado pelo ControllerTime a cada avanço de tempo
     public void tick() {
         time.tick();
         evaluateAutomations();
@@ -180,9 +186,8 @@ public class DomusController implements Serializable {
         return time;
     }
 
-    // =========================================================================
-    // ESTATÍSTICAS
-    // =========================================================================
+    // --- Estatísticas ---
+
     public House getHighestConsumingHouse() {
         return houses.stream()
                 .max(Comparator.comparingDouble(House::getTotalPowerConsumption))
@@ -195,6 +200,8 @@ public class DomusController implements Serializable {
                 .limit(n).toList();
     }
 
+    // usamos getEffectiveTotalOnTime para contar também o tempo dos dispositivos
+    // que ainda estão ligados neste momento
     public List<Device> getTopDevicesByTime(int n, int currentTotalMinutes) {
         return devices.stream()
                 .sorted(Comparator.comparingInt(
@@ -213,6 +220,8 @@ public class DomusController implements Serializable {
                 .orElse(null);
     }
 
+    // usamos Map.entry para conseguir manter a associação casa-divisão durante o
+    // sort
     public List<String> getTopRoomsByDeviceCount(int n) {
         return houses.stream()
                 .flatMap(house -> house.getRooms().stream().map(room -> Map.entry(house, room)))

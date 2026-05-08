@@ -5,6 +5,7 @@ import domuscontrol.model.users.User;
 import domuscontrol.view.UserUI;
 import java.util.List;
 
+// controlador para gestão de utilizadores - criar, listar, ver detalhes e promover
 public class ControllerUsers {
 
     private final DomusController model;
@@ -36,10 +37,12 @@ public class ControllerUsers {
     private void createUser() {
         try {
             String[] data = userUI.readUserData();
+            // verificamos duplicado por id antes de criar
             if (model.getUserById(data[0]) != null) {
                 userUI.showError("Já existe um utilizador com o ID '" + data[0] + "'.");
                 return;
             }
+            // criamos sempre como regular - se quiser admin promove depois
             model.addUser(new RegularUser(data[0], data[1], data[2], data[3]));
             userUI.showSuccess("Utilizador '" + data[1] + "' criado.");
         } catch (IllegalArgumentException e) {
@@ -72,6 +75,8 @@ public class ControllerUsers {
         }
     }
 
+    // este método é chamado pelo ControllerTotal durante o registo
+    // para promover o utilizador logo a seguir a ser criado
     public void promoteUserRegister(String id) {
         try {
             model.promoteToAdmin(id);

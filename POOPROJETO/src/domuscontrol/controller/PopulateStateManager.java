@@ -13,14 +13,12 @@ import domuscontrol.model.users.RegularUser;
 import domuscontrol.utils.actions.*;
 
 public class PopulateStateManager {
-
     private PopulateStateManager() {
     }
 
     public static void seed(DomusController ctrl) {
         if (ctrl == null)
             throw new IllegalArgumentException("O controlador não pode ser nulo.");
-
         seedUtilizadores(ctrl);
         seedCasaFamiliaSilva(ctrl);
         seedCasaVazia(ctrl);
@@ -33,10 +31,8 @@ public class PopulateStateManager {
     private static void seedUtilizadores(DomusController ctrl) {
         AdminUser tiago = new AdminUser("1", "Tiago Fernandes", "tiago@gmail.com", "1");
         ctrl.addUser(tiago);
-
         RegularUser joao = new RegularUser("2", "Joao Pinheiro", "joao@gmail.com", "1");
         ctrl.addUser(joao);
-
         AdminUser hugo = new AdminUser("3", "Hugo Moura", "hugo@gmail.com", "1");
         ctrl.addUser(hugo);
     }
@@ -44,13 +40,11 @@ public class PopulateStateManager {
     private static void seedCasaFamiliaSilva(DomusController ctrl) {
         AdminUser tiago = (AdminUser) ctrl.getUserById("1");
         RegularUser joao = (RegularUser) ctrl.getUserById("2");
-
         House casa = new House("1", "Casa da Praia", "Rua do Mar", tiago);
         ctrl.addHouse(casa);
         tiago.addOwnedHouse(casa);
         joao.addGuestHouse(casa);
         casa.addUser(joao);
-
         Room sala = new Room("1", "Sala");
         SmartLight luzSala = new SmartLight("1", "led", "led", 10.0, false);
         SmartLight luzSalaColor = new SmartLight("2", "led", "led cores", 12.0, true);
@@ -69,7 +63,6 @@ public class PopulateStateManager {
         sala.addDevice(persianaSala);
         persianaSala.setUsed(true);
         casa.addRoom(sala);
-
         Room cozinha = new Room("2", "Cozinha");
         Relay tomadaCozinha = new Relay("5", "generica", "tomada1", 2.0);
         TemperatureSensor tempCozinha = new TemperatureSensor("6", "generica", "sensor temp", 0.5);
@@ -81,7 +74,6 @@ public class PopulateStateManager {
         cozinha.addDevice(tempCozinha);
         tempCozinha.setUsed(true);
         casa.addRoom(cozinha);
-
         Room quarto = new Room("3", "Quarto");
         SmartLight luzQuarto = new SmartLight("7", "led", "led quarto", 9.0, false);
         TemperatureSensor tempQuarto = new TemperatureSensor("8", "generica", "sensor temp2", 0.5);
@@ -97,7 +89,6 @@ public class PopulateStateManager {
         quarto.addDevice(persianaQuarto);
         persianaQuarto.setUsed(true);
         casa.addRoom(quarto);
-
         Room garagem = new Room("4", "Garagem");
         GarageDoor portaoGaragem = new GarageDoor("10", "generica", "portao1", 15.0);
         RainSensor sensorChuva = new RainSensor("11", "generica", "sensor chuva", 1.0);
@@ -118,7 +109,6 @@ public class PopulateStateManager {
 
     private static void seedCasaVazia(DomusController ctrl) {
         AdminUser tiago = (AdminUser) ctrl.getUserById("1");
-
         House casaVazia = new House("4", "Casa Vazia", "Rua do Deserto", tiago);
         ctrl.addHouse(casaVazia);
         tiago.addOwnedHouse(casaVazia);
@@ -126,11 +116,9 @@ public class PopulateStateManager {
 
     private static void seedCasaHugo(DomusController ctrl) {
         AdminUser hugo = (AdminUser) ctrl.getUserById("3");
-
         House apto = new House("2", "Casa da Uni", "Rua de Gualtar 12, Braga", hugo);
         ctrl.addHouse(apto);
         hugo.addOwnedHouse(apto);
-
         Room sala = new Room("5", "Sala");
         SmartLight luzSalaApto = new SmartLight("13", "led", "led sala2", 8.0, true);
         SmartSpeaker colunaApto = new SmartSpeaker("14", "JBL", "coluna2", 7.0);
@@ -141,7 +129,6 @@ public class PopulateStateManager {
         sala.addDevice(colunaApto);
         colunaApto.setUsed(true);
         apto.addRoom(sala);
-
         Room escritorio = new Room("6", "Escritório");
         SmartLight luzEsc = new SmartLight("15", "led", "led escritorio", 6.0, false);
         TemperatureSensor tempEsc = new TemperatureSensor("16", "generica", "sensor temp3", 0.5);
@@ -166,15 +153,11 @@ public class PopulateStateManager {
         LightSensor sensorLuz = (LightSensor) ctrl.getDeviceById("12");
         SmartLight luzSala = (SmartLight) ctrl.getDeviceById("1");
         SmartLight luzSalaColor = (SmartLight) ctrl.getDeviceById("2");
-
-        // Automacao 1: fechar persianas quando chove
         SensorCondition condicaoChuva = new SensorCondition(sensorChuva, Operator.GREATER_THAN, 2.0);
         Automation fechaPersianas = new Automation("Fechar persianas se chover", condicaoChuva);
         fechaPersianas.addAction(new SetOpeningAction(persianaSala, 0));
         fechaPersianas.addAction(new SetOpeningAction(persianaQuarto, 0));
         ctrl.addAutomation(fechaPersianas);
-
-        // Automacao 2: ligar luzes quando luminosidade baixa
         SensorCondition condicaoLuz = new SensorCondition(sensorLuz, Operator.LESS_THAN, 100.0);
         Automation ligaLuzes = new Automation("Ligar luzes quando escurece", condicaoLuz);
         ligaLuzes.addAction(new TurnOnAction(luzSala));
@@ -189,26 +172,18 @@ public class PopulateStateManager {
         SmartLight luzSalaColor = (SmartLight) ctrl.getDeviceById("2");
         SmartLight luzQuarto = (SmartLight) ctrl.getDeviceById("7");
         SmartSpeaker coluna = (SmartSpeaker) ctrl.getDeviceById("3");
-
-        // Escalonamento 1: abrir persianas de manha
         Schedule abrePersianas = new Schedule("Abrir persianas de manha", 7, 30, true);
         abrePersianas.addAction(new SetOpeningAction(persianaSala, 100));
         abrePersianas.addAction(new SetOpeningAction(persianaQuarto, 100));
         ctrl.addSchedule(abrePersianas);
-
-        // Escalonamento 2: ligar luzes da sala ao anoitecer
         Schedule acendeSala = new Schedule("Ligar sala ao anoitecer", 19, 0, true);
         acendeSala.addAction(new TurnOnAction(luzSala));
         acendeSala.addAction(new TurnOnAction(luzSalaColor));
         ctrl.addSchedule(acendeSala);
-
-        // Escalonamento 3: fechar persianas ao fim do dia
         Schedule fechaPersianas = new Schedule("Fechar persianas ao fim do dia", 21, 0, true);
         fechaPersianas.addAction(new SetOpeningAction(persianaSala, 0));
         fechaPersianas.addAction(new SetOpeningAction(persianaQuarto, 0));
         ctrl.addSchedule(fechaPersianas);
-
-        // Escalonamento 4: desligar tudo a meia-noite
         Schedule desligaTudo = new Schedule("Desligar tudo a meia-noite", 0, 0, true);
         desligaTudo.addAction(new TurnOffAction(luzSala));
         desligaTudo.addAction(new TurnOffAction(luzSalaColor));
@@ -219,7 +194,6 @@ public class PopulateStateManager {
 
     private static void seedCenarios(DomusController ctrl) {
         AdminUser tiago = (AdminUser) ctrl.getUserById("1");
-
         SmartLight luzSala = (SmartLight) ctrl.getDeviceById("1");
         SmartLight luzSalaColor = (SmartLight) ctrl.getDeviceById("2");
         SmartLight luzQuarto = (SmartLight) ctrl.getDeviceById("7");
@@ -228,8 +202,6 @@ public class PopulateStateManager {
         Blinds persianaQuarto = (Blinds) ctrl.getDeviceById("9");
         GarageDoor portao = (GarageDoor) ctrl.getDeviceById("10");
         Relay tomada = (Relay) ctrl.getDeviceById("5");
-
-        // Cenario 1: Sair de Casa
         Scenario sairDeCasa = new Scenario("Sair de Casa", tiago);
         sairDeCasa.addAction(new TurnOffAction(luzSala));
         sairDeCasa.addAction(new TurnOffAction(luzSalaColor));
@@ -240,8 +212,6 @@ public class PopulateStateManager {
         sairDeCasa.addAction(new SetOpeningAction(persianaQuarto, 0));
         sairDeCasa.addAction(new SetOpeningAction(portao, 0));
         ctrl.addScenario(sairDeCasa);
-
-        // Cenario 2: Jantar com Amigos
         Scenario jantarAmigos = new Scenario("Jantar com Amigos", tiago);
         jantarAmigos.addAction(new SetBrightnessAction(luzSalaColor, 40));
         jantarAmigos.addAction(new TurnOnAction(luzSalaColor));
@@ -249,8 +219,6 @@ public class PopulateStateManager {
         jantarAmigos.addAction(new TurnOnAction(coluna));
         jantarAmigos.addAction(new SetOpeningAction(persianaSala, 0));
         ctrl.addScenario(jantarAmigos);
-
-        // Cenario 3: Deitar
         Scenario deitar = new Scenario("Deitar", tiago);
         deitar.addAction(new TurnOffAction(luzSala));
         deitar.addAction(new TurnOffAction(luzSalaColor));
@@ -260,8 +228,6 @@ public class PopulateStateManager {
         deitar.addAction(new SetBrightnessAction(luzQuarto, 10));
         deitar.addAction(new TurnOnAction(luzQuarto));
         ctrl.addScenario(deitar);
-
-        // Cenario 4: Acordar
         Scenario acordar = new Scenario("Acordar", tiago);
         acordar.addAction(new SetOpeningAction(persianaSala, 100));
         acordar.addAction(new SetOpeningAction(persianaQuarto, 100));
